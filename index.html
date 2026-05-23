@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Neoball</title>
 
     <!-- OpenGraph / Social card meta -->
@@ -24,9 +24,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <style>
+        html { background-color: #020205; }
         body {
             margin: 0;
             padding: 0;
+            /* Stretch into the iPhone notch area */
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+
             background: radial-gradient(circle at center, #0c0d19 0%, #020205 100%);
             color: #ffffff;
             font-family: 'Orbitron', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -353,16 +357,36 @@
         @keyframes fade-up { to { opacity: 1; transform: translate3d(0, 0, 0); } }
 
         #sys-pause-btn {
-            position: absolute; top: 25px; right: 35px; background: rgba(5, 6, 18, 0.8);
-            border: 2px solid #1e2445; color: #94a3b8; border-radius: 12px; padding: 10px 18px;
-            font-family: inherit; font-weight: 900; letter-spacing: 2px; cursor: pointer;
-            z-index: 50; transition: all 0.2s; display: none;
+            background: rgba(5, 6, 18, 0.8);
+            border: 2px solid #1e2445; 
+            color: #94a3b8; 
+            border-radius: 8px; 
+            padding: 6px 16px;
+            font-family: inherit; 
+            font-weight: 900; 
+            letter-spacing: 2px; 
+            cursor: pointer;
+            transition: all 0.2s; 
+            display: none; 
+            margin: 0; /* <-- Changed this to 0 */
+            font-size: 11px;
+        }
+        
+        #sys-pause-btn:hover { 
+            border-color: #38bdf8; 
+            color: #38bdf8; 
+            box-shadow: 0 0 10px rgba(56,189,248,0.2); 
         }
 
-        #sys-pause-btn:hover { border-color: #38bdf8; color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.2); }
-
         #game-container {
-            display: none; flex-direction: column; width: 100%; max-width: 1120px; padding: 20px; box-sizing: border-box;
+            display: none; 
+            flex-direction: column; 
+            width: 100%; 
+            height: 100vh; /* Fallback for old browsers */
+            height: 100dvh; /* Automatically resizes when toolbars vanish! */
+            max-width: 1200px; 
+            padding: 15px; 
+            box-sizing: border-box;
         }
 
         #scoreboard { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px; }
@@ -727,7 +751,6 @@
         /* Universal Tiny Screen Support */
         @media (max-width: 600px) {
             #scoreboard { flex-direction: column; }
-            #sys-pause-btn { top: 10px; right: 10px; padding: 8px 12px; font-size: 11px;}
         }
     </style>
 </head>
@@ -870,7 +893,6 @@
         </div>
     </div>
 
-    <button id="sys-pause-btn">|| PAUSE</button>
 
     <div id="game-container">
         <div id="scoreboard">
@@ -883,6 +905,10 @@
                 <h1 id="game-title">NEOBALL</h1>
                 <div id="countdown-clock">T-MINUS: 15.0s</div>
                 <div id="status-ticker">GAME READY</div>
+
+                <div style="height: 28px; margin-top: 10px; display: flex; justify-content: center;">
+                    <button id="sys-pause-btn">|| PAUSE</button>
+                </div>
             </div>
             <div id="card-p2" class="player-card">
                 <div id="name-p2" class="player-name">PLAYER 02</div>

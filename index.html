@@ -763,23 +763,115 @@
             }
         }
 
-       @media (max-height: 600px) and (orientation: landscape) {
-            #game-container { padding: 5px 15px; }
-            #scoreboard { margin-bottom: 5px; gap: 5px; }
-            .player-card { min-width: 100px; padding: 5px 10px; }
-            .player-name { font-size: 13px; margin-bottom: 2px; }
-            #game-title { font-size: 18px; margin-bottom: 2px; }
-            #countdown-clock { font-size: 12px; margin-top: 2px; }
-            
-            #arena-floor { gap: 15px; }
-            
-            #control-deck {
-                width: 110px;
-                padding: 10px;
-                gap: 15px;
+       /* --- 100% CLEAN NATIVE MOBILE LANDSCAPE --- */
+        @media (max-height: 600px) and (orientation: landscape) {
+            /* Lock the screen and prevent scroll-bouncing */
+            body, html {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden !important;
+                background: #000;
+                touch-action: none; /* Prevents native zoom/pan gestures */
             }
-            #spin-widget { width: 60px; height: 60px; }
-            #power-rail-box { width: 28px; height: 140px; }
+
+            #game-container {
+                padding: 0;
+                width: 100vw;
+                height: 100dvh; /* 100dvh perfectly fits mobile browsers hiding URL bars */
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* --- FLOATING SCOREBOARD --- */
+            #scoreboard {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin: 0;
+                padding: 8px 24px;
+                box-sizing: border-box;
+                background: linear-gradient(to bottom, rgba(6, 8, 20, 0.9) 0%, transparent 100%);
+                border: none;
+                z-index: 10;
+                pointer-events: none; /* Let touches pass through the empty space to the canvas */
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            /* Re-enable clicking on buttons inside the scoreboard */
+            #scoreboard * { pointer-events: auto; }
+
+            .player-card {
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 5px 12px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                min-width: unset;
+            }
+
+            .player-name { font-size: 12px; margin: 0; letter-spacing: 1px; }
+            .group-status { display: none; } /* Hide clutter */
+            .tray { margin: 0; height: 12px; }
+
+            /* --- STREAMLINED CENTER HUD --- */
+            #game-title { display: none !important; } /* Hide big logo in gameplay */
+            #middle-ui { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+            #countdown-clock { font-size: 15px; margin: 0; text-shadow: 0 0 10px rgba(0, 255, 255, 0.8); }
+            #status-ticker { font-size: 10px; margin: 0; }
+
+            /* --- MAXIMIZED CANVAS --- */
+            #arena-floor {
+                width: 100%; height: 100%; padding: 0; margin: 0;
+                display: flex; justify-content: center; align-items: center;
+            }
+            canvas {
+                max-width: 100vw;
+                max-height: 100dvh;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* --- FLOATING CONTROLS (Right Thumb) --- */
+            #control-deck {
+                position: absolute;
+                right: env(safe-area-inset-right, 20px);
+                bottom: env(safe-area-inset-bottom, 20px);
+                width: auto; height: auto; padding: 0; margin: 0;
+                background: transparent; border: none; box-shadow: none;
+                display: flex; flex-direction: row; align-items: flex-end; gap: 25px;
+                z-index: 10;
+            }
+
+            #spin-widget {
+                width: 60px; height: 60px;
+                background: rgba(10, 15, 30, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                border-radius: 50%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            }
+
+            #power-rail-box {
+                width: 32px; height: 150px;
+                background: rgba(10, 15, 30, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            }
+            
+            /* --- MENU FIXES --- */
+            .menu-panel { max-height: 90dvh; overflow-y: auto; padding: 15px; }
         }
 
         /* Universal Tiny Screen Support */
@@ -2348,12 +2440,11 @@
             const canvas = document.getElementById('gameCanvas');
             const rect = canvas.getBoundingClientRect();
             
-            // 1. Check if the input is a touch on a screen OR a mouse click
+            // Automatically detect if user is using Mouse or Touch
             const isTouch = e.touches && e.touches.length > 0;
             const clientX = isTouch ? e.touches[0].clientX : e.clientX;
             const clientY = isTouch ? e.touches[0].clientY : e.clientY;
             
-            // 2. Map the tap exactly to the 900x450 internal resolution
             return {
                 x: (clientX - rect.left) * (canvas.width / rect.width),
                 y: (clientY - rect.top) * (canvas.height / rect.height)
@@ -2387,16 +2478,18 @@
             }
         }
         function handleInputStart(e) {
+            // THE ULTIMATE ALLOWLIST: Let buttons, inputs, and menus work normally!
             if (
                 e.target.tagName === 'BUTTON' || 
                 e.target.tagName === 'INPUT' || 
+                e.target.closest('button') || 
                 e.target.closest('.menu-panel') || 
                 e.target.closest('.color-preset-card')
             ) {
-                return;
+                return; // Exit game logic and let the browser click/type normally
             }
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.cancelable) e.preventDefault(); 
+
+            if (e.cancelable) e.preventDefault(); // Stop canvas from highlighting/scrolling
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2420,30 +2513,26 @@
                 inputState = 'dragging_ball'; 
             } else { 
                 inputState = 'aiming'; 
-                
                 if (isTouch) {
-                    // MOBILE (8 Ball Pool style):
-                    // Record the starting angle but DO NOT snap the stick.
-                    // This prevents accidentally ruining a good aim just by touching the screen.
                     lastTouchAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
                 } else {
-                    // DESKTOP (Mouse):
-                    // Snap the stick directly to the mouse cursor instantly.
                     aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
                 }
             }
         }
 
         function handleInputMove(e) {
+            // Apply the same allowlist so you can scroll menus
             if (
                 e.target.tagName === 'BUTTON' || 
                 e.target.tagName === 'INPUT' || 
+                e.target.closest('button') || 
                 e.target.closest('.menu-panel') || 
                 e.target.closest('.color-preset-card')
             ) {
-                return;
+                return; 
             }
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
             if (e.cancelable) e.preventDefault(); 
             if (matchEndCondition || isPaused) return;
             
@@ -2467,22 +2556,16 @@
                 if (clear) { cueBall.x = prospectiveX; cueBall.y = prospectiveY; }
             } else if (inputState === 'aiming') { 
                 const p = parseCanvasCoords(e); 
-                
                 if (isTouch) {
-                    // MOBILE (8 Ball Pool style):
-                    // Calculate how much your finger rotated around the cue ball
                     let currentTouchAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
                     let angleDelta = currentTouchAngle - lastTouchAngle;
                     
-                    // Normalize delta so aiming doesn't violently glitch across the 180-degree mark
                     if (angleDelta > Math.PI) angleDelta -= Math.PI * 2;
                     if (angleDelta < -Math.PI) angleDelta += Math.PI * 2;
                     
                     aimAngle += angleDelta;
                     lastTouchAngle = currentTouchAngle;
                 } else {
-                    // DESKTOP (Mouse):
-                    // Absolute tracking. The stick exactly tracks your mouse point.
                     aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
                 }
             }

@@ -763,23 +763,175 @@
             }
         }
 
-       @media (max-height: 600px) and (orientation: landscape) {
-            #game-container { padding: 5px 15px; }
-            #scoreboard { margin-bottom: 5px; gap: 5px; }
-            .player-card { min-width: 100px; padding: 5px 10px; }
-            .player-name { font-size: 13px; margin-bottom: 2px; }
-            #game-title { font-size: 18px; margin-bottom: 2px; }
-            #countdown-clock { font-size: 12px; margin-top: 2px; }
-            
-            #arena-floor { gap: 15px; }
-            
-            #control-deck {
-                width: 110px;
-                padding: 10px;
-                gap: 15px;
+      /* --- 100% CLEAN NATIVE MOBILE LANDSCAPE --- */
+        @media (max-height: 600px) and (orientation: landscape) {
+            /* Enforce true full-screen layout and remove scrolling text glitches */
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: hidden;
+                background: #000;
             }
-            #spin-widget { width: 60px; height: 60px; }
-            #power-rail-box { width: 28px; height: 140px; }
+
+            #game-container {
+                padding: 0;
+                width: 100vw;
+                height: 100dvh; /* Dynamic viewport height handles mobile address bars perfectly */
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* 1. Transparent Floating Scoreboard (Top Bar Layout) */
+            #scoreboard {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin: 0;
+                padding: 6px 20px;
+                box-sizing: border-box;
+                background: linear-gradient(to bottom, rgba(6, 8, 20, 0.85) 0%, transparent 100%);
+                border: none;
+                box-shadow: none;
+                z-index: 10;
+                pointer-events: none; /* Allows canvas interactions underneath */
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            /* Re-enable touch interactions specifically for interactive scoreboard items */
+            #scoreboard * {
+                pointer-events: auto;
+            }
+
+            /* Flatten player containers into slim glassmorphic badges */
+            .player-card {
+                min-width: unset;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 4px 10px;
+                border-radius: 6px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .player-name {
+                font-size: 11px;
+                margin-bottom: 0;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            /* Hiding the massive title screen logo frees up over 20% of vertical table space */
+            #game-title {
+                display: none !important;
+            }
+
+            #middle-ui {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+            }
+
+            #countdown-clock {
+                font-size: 13px;
+                font-weight: bold;
+                margin: 0;
+                text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+            }
+
+            #status-ticker {
+                font-size: 9px;
+                margin: 0;
+                opacity: 0.8;
+            }
+
+            /* 2. Maximized Arena Real Estate */
+            #arena-floor {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: #000;
+            }
+
+            #canvas-wrapper {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            canvas {
+                max-width: 100vw;
+                max-height: 100dvh;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* 3. Floating HUD Controls (Bottom Right Corner for Right-Thumb Ergonomics) */
+            #control-deck {
+                position: absolute;
+                /* env() handles modern device notches safely */
+                right: env(safe-area-inset-right, 16px);
+                bottom: env(safe-area-inset-bottom, 12px);
+                width: auto;
+                height: auto;
+                padding: 0;
+                margin: 0;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                display: flex;
+                flex-direction: row; /* Horizontal side-by-side positioning inside your thumb reach */
+                align-items: flex-end;
+                gap: 20px;
+                z-index: 10;
+            }
+
+            /* Transparent glassmorphism panels for interactive controls */
+            #spin-widget {
+                width: 55px;
+                height: 55px;
+                background: rgba(10, 15, 30, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border-radius: 50%;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            }
+
+            #power-rail-box {
+                width: 26px;
+                height: 135px;
+                background: rgba(10, 15, 30, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border-radius: 6px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            }
+            
+            /* Clean scrolling architecture for menu/setup layers in landscape */
+            .menu-panel {
+                max-height: 90dvh;
+                overflow-y: auto;
+                padding: 15px;
+            }
         }
 
         /* Universal Tiny Screen Support */

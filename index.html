@@ -2388,6 +2388,7 @@
             }
         }
         function handleInputStart(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.cancelable) e.preventDefault(); 
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
@@ -2427,6 +2428,7 @@
         }
 
         function handleInputMove(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.cancelable) e.preventDefault(); 
             if (matchEndCondition || isPaused) return;
             

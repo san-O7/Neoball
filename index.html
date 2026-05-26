@@ -32,7 +32,7 @@
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 
             background: radial-gradient(circle at center, #0c0d19 0%, #020205 100%);
-            color: #ffffff;
+            color: #f8fafc;
             font-family: 'Orbitron', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex;
             align-items: center;
@@ -41,6 +41,10 @@
             overflow: hidden;
             user-select: none;
             touch-action: none;
+            overscroll-behavior-y: none;
+            width: 100%;
+            height: 100%;
+            position: fixed;
         }
 
         /* Generic Menu Panel Styling */
@@ -371,7 +375,7 @@
             margin: 0; /* <-- Changed this to 0 */
             font-size: 11px;
         }
-        
+
         #sys-pause-btn:hover { 
             border-color: #38bdf8; 
             color: #38bdf8; 
@@ -416,10 +420,31 @@
         }
 
         #countdown-clock { font-size: 15px; font-weight: 900; letter-spacing: 4px; margin-top: 5px; font-family: monospace; transition: all 0.2s ease; }
-        #status-ticker { font-size: 11px; letter-spacing: 2px; color: #38bdf8; margin-top: 6px; font-weight: 800; }
+        #status-ticker { 
+            font-size: 11px; 
+            letter-spacing: 2px; 
+            color: #38bdf8; 
+            margin-top: 6px; 
+            font-weight: 800; 
+            /* FIX: Lock height to prevent text wrapping from shifting the canvas up/down */
+            height: 32px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+        }
 
         #arena-floor { display: flex; gap: 24px; width: 100%; align-items: center; }
         #canvas-wrapper { flex: 1; position: relative; cursor: crosshair; }
+
+        #gameCanvas {
+            touch-action: none; /* Stops the browser from panning/glitching margins */
+            -webkit-user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
         
         canvas {
             background-color: #04050d; border: 4px solid #1e2445; border-radius: 20px;
@@ -578,7 +603,19 @@
         }
 
         #countdown-clock { font-size: 16px; font-weight: 900; letter-spacing: 4px; margin-top: 5px; font-family: monospace; transition: all 0.2s ease; }
-        #status-ticker { font-size: 11px; letter-spacing: 2px; color: #38bdf8; margin-top: 6px; font-weight: 800; }
+        #status-ticker { 
+            font-size: 11px; 
+            letter-spacing: 2px; 
+            color: #38bdf8; 
+            margin-top: 6px; 
+            font-weight: 800; 
+            /* FIX: Same fixed height requirement for responsive layouts */
+            height: 32px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+        }
 
         /* Arena Floor & Canvas Container */
         #arena-floor { 
@@ -1222,6 +1259,7 @@
         let gameLoopId = null; 
         let inputState = 'idle'; 
         let aimAngle = 0; 
+        let lastTouchAngle = 0; 
         let currentPower = 0; 
         let timeLeft = 15.0; 
         let shotClockInterval = null;
@@ -2310,38 +2348,61 @@
         }
 
         function parseCanvasCoords(e) {
+            // Always fetch a fresh bounding box to fix Fullscreen offset issues
             const rect = canvas.getBoundingClientRect();
-            let cx = e.touches ? e.touches[0].clientX : e.clientX; 
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let cx = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX; 
+            let cy = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+            
+            // FIX: We MUST use 900 and 450 here, NOT canvas.width/height! 
+            // This prevents Retina phone screens from scaling your touch off the table.
             return { 
                 x: (cx - rect.left) * (900 / rect.width), 
                 y: (cy - rect.top) * (450 / rect.height) 
             };
         }
 
-        function updatePowerFromY(clientY, rect) {
-            let relativeY = clientY - rect.top; 
+        function updatePower(clientX, clientY, rect) {
+            let isPortrait = window.innerWidth <= 950 && window.innerHeight > window.innerWidth;
             
-            currentPower = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
+            if (isPortrait) {
+                // In portrait, the rail is horizontal, calculate based on X
+                let relativeX = clientX - rect.left;
+                currentPower = Math.max(0, Math.min(100, (relativeX / rect.width) * 100));
+            } else {
+                // In landscape/desktop, the rail is vertical, calculate based on Y
+                let relativeY = clientY - rect.top; 
+                currentPower = Math.max(0, Math.min(100, (relativeY / rect.height) * 100));
+            }
             
-            document.getElementById('power-glow-fill').style.height = `${currentPower}%`; 
-            document.getElementById('power-handle').style.top = `${currentPower}%`;
+            // Apply visual changes
+            if (isPortrait) {
+                document.getElementById('power-glow-fill').style.width = `${currentPower}%`;
+                document.getElementById('power-glow-fill').style.height = `100%`; 
+                document.getElementById('power-handle').style.left = `${currentPower}%`;
+                document.getElementById('power-handle').style.top = `50%`;
+            } else {
+                document.getElementById('power-glow-fill').style.height = `${currentPower}%`;
+                document.getElementById('power-glow-fill').style.width = `100%`; 
+                document.getElementById('power-handle').style.top = `${currentPower}%`;
+                document.getElementById('power-handle').style.left = `-6px`;
+            }
         }
-
         function handleInputStart(e) {
+            if (e.cancelable) e.preventDefault(); 
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
-            let cx = e.touches ? e.touches[0].clientX : e.clientX; 
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let isTouch = e.touches && e.touches.length > 0;
+            let cx = isTouch ? e.touches[0].clientX : e.clientX; 
+            let cy = isTouch ? e.touches[0].clientY : e.clientY;
             
             let rail = document.getElementById('power-rail-box'); 
             let rect = rail.getBoundingClientRect();
             
-            let padH = 50, padV = 30; 
+            let padH = 50, padV = 50; 
             if (cx >= rect.left - padH && cx <= rect.right + padH && cy >= rect.top - padV && cy <= rect.bottom + padV) { 
                 inputState = 'charging'; 
-                updatePowerFromY(cy, rect); 
+                updatePower(cx, cy, rect); 
                 return; 
             }
             
@@ -2351,17 +2412,30 @@
                 inputState = 'dragging_ball'; 
             } else { 
                 inputState = 'aiming'; 
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                
+                if (isTouch) {
+                    // MOBILE (8 Ball Pool style):
+                    // Record the starting angle but DO NOT snap the stick.
+                    // This prevents accidentally ruining a good aim just by touching the screen.
+                    lastTouchAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
+                } else {
+                    // DESKTOP (Mouse):
+                    // Snap the stick directly to the mouse cursor instantly.
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                }
             }
         }
 
         function handleInputMove(e) {
+            if (e.cancelable) e.preventDefault(); 
             if (matchEndCondition || isPaused) return;
             
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let isTouch = e.touches && e.touches.length > 0;
+            let cx = isTouch ? e.touches[0].clientX : e.clientX; 
+            let cy = isTouch ? e.touches[0].clientY : e.clientY;
             
             if (inputState === 'charging') { 
-                updatePowerFromY(cy, document.getElementById('power-rail-box').getBoundingClientRect()); 
+                updatePower(cx, cy, document.getElementById('power-rail-box').getBoundingClientRect()); 
             } else if (inputState === 'dragging_ball' && isBallInHand) {
                 const p = parseCanvasCoords(e);
                 let prospectiveX = Math.max(TABLE_LEFT + CUSHION_D + BALL_RADIUS + 2, Math.min(TABLE_RIGHT - CUSHION_D - BALL_RADIUS - 2, p.x));
@@ -2370,22 +2444,32 @@
                 let clear = true;
                 for (let b of balls) { 
                     if (!b.active || b.num === 0) continue;
-                    if (b.x < -100 || b.y < -100) continue; // skip pocketed balls at sentinel coords
-                    if (Math.hypot(prospectiveX - b.x, prospectiveY - b.y) < BALL_RADIUS * 2 + 2) { 
-                        clear = false; 
-                        break; 
-                    } 
+                    if (b.x < -100 || b.y < -100) continue; 
+                    if (Math.hypot(prospectiveX - b.x, prospectiveY - b.y) < BALL_RADIUS * 2 + 2) { clear = false; break; } 
                 }
-                if (clear) { 
-                    cueBall.x = prospectiveX; 
-                    cueBall.y = prospectiveY; 
-                }
+                if (clear) { cueBall.x = prospectiveX; cueBall.y = prospectiveY; }
             } else if (inputState === 'aiming') { 
                 const p = parseCanvasCoords(e); 
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                
+                if (isTouch) {
+                    // MOBILE (8 Ball Pool style):
+                    // Calculate how much your finger rotated around the cue ball
+                    let currentTouchAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
+                    let angleDelta = currentTouchAngle - lastTouchAngle;
+                    
+                    // Normalize delta so aiming doesn't violently glitch across the 180-degree mark
+                    if (angleDelta > Math.PI) angleDelta -= Math.PI * 2;
+                    if (angleDelta < -Math.PI) angleDelta += Math.PI * 2;
+                    
+                    aimAngle += angleDelta;
+                    lastTouchAngle = currentTouchAngle;
+                } else {
+                    // DESKTOP (Mouse):
+                    // Absolute tracking. The stick exactly tracks your mouse point.
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
+                }
             }
         }
-
         function handleInputEnd(e) {
             if (isPaused) return;
             
@@ -2431,13 +2515,11 @@
         window.addEventListener('mousemove', handleInputMove); 
         window.addEventListener('mouseup', handleInputEnd);
         
-        window.addEventListener('touchstart', handleInputStart, { passive: true }); 
-        window.addEventListener('touchmove', handleInputMove, { passive: true }); 
+        window.addEventListener('touchstart', handleInputStart, { passive: false }); 
+        window.addEventListener('touchmove', handleInputMove, { passive: false }); 
         window.addEventListener('touchend', handleInputEnd);
 
-        // Pointer-capture on the rail itself: once a pointerdown lands on (or near) the
-        // rail, ALL subsequent pointer events route to it until pointerup — no more
-        // lost inputs when the cursor drifts slightly above or beside the handle.
+
         (function() {
             const rail = document.getElementById('power-rail-box');
             rail.addEventListener('pointerdown', function(e) {
@@ -2445,12 +2527,12 @@
                 initAudio();
                 inputState = 'charging';
                 try { this.setPointerCapture(e.pointerId); } catch(_) {}
-                updatePowerFromY(e.clientY, this.getBoundingClientRect());
+                updatePower(e.clientX, e.clientY, this.getBoundingClientRect());
                 e.stopPropagation();
             });
             rail.addEventListener('pointermove', function(e) {
                 if (inputState !== 'charging') return;
-                updatePowerFromY(e.clientY, this.getBoundingClientRect());
+                updatePower(e.clientX, e.clientY, this.getBoundingClientRect());
             });
             rail.addEventListener('pointerup', function(e) {
                 if (inputState !== 'charging') return;
@@ -2579,14 +2661,14 @@
             });
         });
 
-        document.getElementById('btn-menu-local').addEventListener('click', () => { 
-            document.getElementById('main-menu').style.display = 'none'; 
+        document.getElementById('btn-menu-local').addEventListener('click', () => {
+            initAudio(); sfx.click();
+            document.getElementById('main-menu').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'flex';
-            // Restore last-used names
-            const s1 = localStorage.getItem('nb_p1Name');
-            const s2 = localStorage.getItem('nb_p2Name');
-            if (s1) document.getElementById('p1-name-input').value = s1;
-            if (s2) document.getElementById('p2-name-input').value = s2;
+            
+            // Wipe the input boxes clean every time so they show the placeholders
+            document.getElementById('p1-name-input').value = '';
+            document.getElementById('p2-name-input').value = '';
         });
 
         document.getElementById('btn-menu-settings').addEventListener('click', () => { 
@@ -2615,15 +2697,31 @@
             document.getElementById('main-menu').style.display = 'flex'; 
         });
         
-        document.getElementById('start-btn').addEventListener('click', () => {
-            const n1 = document.getElementById('p1-name-input').value.trim();
-            const n2 = document.getElementById('p2-name-input').value.trim();
-            if (n1) localStorage.setItem('nb_p1Name', n1);
-            if (n2) localStorage.setItem('nb_p2Name', n2);
+       document.getElementById('start-btn').addEventListener('click', async () => {
+            // Auto-hide toolbar by going fullscreen
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen().catch(()=>{}); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+
+            // Launch the game (No name saving here anymore!)
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('game-container').style.display = 'flex';
             initLevel(); 
             gameLoopId = requestAnimationFrame(gameLoop);
+
+            try {
+                let elem = document.documentElement;
+                if (elem.requestFullscreen) { elem.requestFullscreen().catch(()=>{}); } 
+                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+            } catch(e) {}
+
+            setTimeout(() => {
+                document.getElementById('setup-screen').style.display = 'none'; 
+                document.getElementById('game-container').style.display = 'flex';
+                initLevel();
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                gameLoopId = requestAnimationFrame(gameLoop);
+            }, 300);
         });
 
         document.getElementById('sys-pause-btn').addEventListener('click', () => {
@@ -3035,5 +3133,7 @@
     </script>
 </body>
 </html>
+
+    
 
 

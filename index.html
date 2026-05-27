@@ -2328,10 +2328,19 @@
             document.getElementById('power-handle').style.top = `${currentPower}%`;
         }
 
+        let previousTouchX = null;
+        let previousTouchY = null;
+
         function handleInputStart(e) {
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
+            // Track start position for mobile rotation so it doesn't jump
+            if (e.touches && e.touches.length > 0) {
+                previousTouchX = e.touches[0].clientX;
+                previousTouchY = e.touches[0].clientY;
+            }
+
             let cx = e.touches ? e.touches[0].clientX : e.clientX; 
             let cy = e.touches ? e.touches[0].clientY : e.clientY;
             
@@ -2351,7 +2360,11 @@
                 inputState = 'dragging_ball'; 
             } else { 
                 inputState = 'aiming'; 
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                // DESKTOP: Snap aim immediately to the cursor. 
+                // MOBILE: Do not snap on tap, wait for swipe.
+                if (!e.touches) {
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                }
             }
         }
 
@@ -2381,8 +2394,28 @@
                     cueBall.y = prospectiveY; 
                 }
             } else if (inputState === 'aiming') { 
-                const p = parseCanvasCoords(e); 
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                if (e.touches && e.touches.length > 0) {
+                    // MOBILE: 8-Ball Pool style swipe rotation
+                    const currentTouchX = e.touches[0].clientX;
+                    const currentTouchY = e.touches[0].clientY;
+                    
+                    if (previousTouchX !== null && previousTouchY !== null) {
+                        const deltaX = currentTouchX - previousTouchX;
+                        const deltaY = currentTouchY - previousTouchY;
+                        
+                        // Sensitivity: Adjust this to make it spin faster or slower when dragging
+                        const rotationSensitivity = 0.005; 
+                        
+                        aimAngle += (deltaX * rotationSensitivity) + (deltaY * rotationSensitivity);
+                    }
+                    
+                    previousTouchX = currentTouchX;
+                    previousTouchY = currentTouchY;
+                } else {
+                    // DESKTOP: Direct coordinate targeting
+                    const p = parseCanvasCoords(e); 
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                }
             }
         }
 
@@ -2402,6 +2435,10 @@
             } else if (inputState === 'aiming') { 
                 inputState = 'idle'; 
             }
+
+            // Reset touch tracking when finger is lifted
+            previousTouchX = null;
+            previousTouchY = null;
         }
 
         function fireShot() {

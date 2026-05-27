@@ -731,20 +731,20 @@
         @media (max-width: 950px) and (orientation: portrait) {
             #game-container { padding: 8px; }
         
-            /* --- SCOREBOARD: auto height so nothing clips --- */
+            /* --- SCOREBOARD: auto height, hard clip so ticker never bleeds --- */
             #scoreboard {
                 height: auto !important;
                 min-height: auto !important;
                 max-height: none !important;
                 margin-bottom: 8px;
-                flex-wrap: nowrap;         /* keep both cards + middle in one row */
+                flex-wrap: nowrap;
                 gap: 6px;
                 align-items: stretch;
             }
         
-            /* --- PLAYER CARDS: slim down, let flex handle width --- */
+            /* --- PLAYER CARDS --- */
             .player-card {
-                min-width: 0;              /* allow shrinking below 180 px */
+                min-width: 0;
                 padding: 7px 8px;
                 flex: 1;
                 border-radius: 12px;
@@ -761,7 +761,7 @@
                 letter-spacing: 0.5px;
             }
         
-            /* --- BALL TRAY: smaller balls so all 7 fit --- */
+            /* --- BALL TRAY --- */
             .tray {
                 margin-top: 5px;
                 height: 11px;
@@ -781,10 +781,11 @@
                 margin: 0;
             }
         
-            /* --- MIDDLE UI --- */
+            /* --- MIDDLE UI: clipped so ticker text can never escape --- */
             #middle-ui {
-                min-width: 100px;
+                min-width: 0;       /* allow shrinking */
                 flex: 1.2;
+                overflow: hidden;   /* hard wall — ticker text stays inside */
             }
         
             #game-title {
@@ -797,41 +798,61 @@
                 letter-spacing: 2px;
             }
         
+            /* Ticker: nowrap is fine now that the parent clips */
             #status-ticker {
                 font-size: 9px;
                 letter-spacing: 1px;
                 height: 16px;
                 line-height: 16px;
+                max-width: 100%;
+                overflow: hidden;
+                /* fade out edges instead of hard cut */
+                mask-image: linear-gradient(
+                    to right,
+                    transparent 0%,
+                    black 8%,
+                    black 92%,
+                    transparent 100%
+                );
+                -webkit-mask-image: linear-gradient(
+                    to right,
+                    transparent 0%,
+                    black 8%,
+                    black 92%,
+                    transparent 100%
+                );
             }
         
-            /* --- PAUSE BUTTON: keep it visible --- */
+            /* --- PAUSE BUTTON --- */
             #sys-pause-btn {
-                display: block !important;   /* override any JS hide */
+                display: block !important;
                 font-size: 9px;
                 padding: 4px 10px;
                 letter-spacing: 1px;
             }
         
-            /* --- ARENA FLOOR: stack canvas above controls --- */
+            /* --- ARENA FLOOR: canvas on top, controls below --- */
             #arena-floor {
                 flex-direction: column;
                 gap: 10px;
             }
         
-            /* --- CONTROL DECK: horizontal strip at bottom --- */
+            /* --- CONTROL DECK: horizontal strip --- */
             #control-deck {
                 flex-direction: row;
                 width: 100%;
                 height: auto;
-                padding: 12px 16px;
-                gap: 20px;
+                padding: 14px 20px;
+                gap: 0;
                 justify-content: space-around;
+                align-items: center;
                 align-self: auto;
                 border-radius: 16px;
             }
         
             .control-group {
                 width: auto;
+                align-items: center;
             }
         
             .deck-label {
@@ -844,37 +865,46 @@
                 width: 72px;
                 height: 72px;
             }
+        
+            /* ----------------------------------------------------------------
+            POWER RAIL — PORTRAIT
+            Strategy: keep the rail VERTICAL (JS writes height + top so we
+            don't fight it), but give it sensible compact dimensions.
+            It sits in the horizontal control-deck alongside the spin widget.
+            ---------------------------------------------------------------- */
             #power-rail-box {
-                width: 180px;
-                height: 32px;
-                border-radius: 16px;
+                /* reset any rotation from a previous attempt */
+                transform: none;
+                margin: 0;
+        
+                width: 30px;
+                height: 120px;
+                border-radius: 15px;
                 touch-action: none;
-                transform: rotate(-90deg);   /* flip vertical → horizontal */
-                transform-origin: center center;
-                /* compensate for the dimension swap so layout stays correct */
-                margin: calc((180px - 32px) / 2) calc((32px - 180px) / 2);
             }
         
-            /* fill and handle keep their original CSS — JS writes height/top and
-            because the whole box is rotated the bar grows left-to-right  */
+            /* Fill: grows downward from top (matches JS .style.height) */
             #power-glow-fill {
                 position: absolute;
-                bottom: 0; left: 0;
-                width: 100%; height: 0%;
-                border-radius: 14px;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 0%;          /* JS overrides this */
+                border-radius: 13px;
                 pointer-events: none;
             }
         
+            /* Handle: slides top-to-bottom (matches JS .style.top) */
             #power-handle {
                 position: absolute;
-                top: 0%;
-                left: -6px; right: auto;
-                width: 44px; height: 18px;
+                top: 0%;             /* JS overrides this */
+                left: -7px;
+                width: 44px;
+                height: 18px;
                 border-radius: 10px;
                 transform: translateY(-50%);
                 pointer-events: none;
             }
-
         }
 
         /* ========================================= */

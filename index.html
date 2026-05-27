@@ -729,183 +729,183 @@
         /* --- MOBILE PORTRAIT MODE (VERTICAL) --- */
         /* ========================================= */
         @media (max-width: 950px) and (orientation: portrait) {
-        #game-container { padding: 8px; }
-    
-        /* --- SCOREBOARD: auto height, hard clip so ticker never bleeds --- */
-        #scoreboard {
-            height: auto !important;
-            min-height: auto !important;
-            max-height: none !important;
-            margin-bottom: 8px;
-            flex-wrap: nowrap;
-            gap: 6px;
-            align-items: stretch;
-        }
-    
-        /* --- PLAYER CARDS --- */
-        .player-card {
-            min-width: 0;
-            padding: 7px 8px;
-            flex: 1;
-            border-radius: 12px;
-        }
-    
-        .player-name {
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            margin-bottom: 3px;
-        }
-    
-        .group-status {
-            font-size: 9px;
-            letter-spacing: 0.5px;
-        }
-    
-        /* --- BALL TRAY --- */
-        .tray {
-            margin-top: 5px;
-            height: 11px;
-            gap: 0;
-            flex-wrap: nowrap;
-            justify-content: center;
-        }
-    
-        .hud-ball {
-            width: 10px;
-            height: 10px;
-            margin: 0 2px;
-        }
-    
-        .hud-ball.sunk {
-            width: 0;
-            margin: 0;
-        }
-    
-        /* --- MIDDLE UI: clipped so ticker text can never escape --- */
-        #middle-ui {
-            min-width: 0;       /* allow shrinking */
-            flex: 1.2;
-            overflow: hidden;   /* hard wall — ticker text stays inside */
-        }
-    
-        #game-title {
-            font-size: 16px;
-            letter-spacing: 4px;
-        }
-    
-        #countdown-clock {
-            font-size: 12px;
-            letter-spacing: 2px;
-        }
-    
-        /* Ticker: nowrap is fine now that the parent clips */
-        #status-ticker {
-            font-size: 9px;
-            letter-spacing: 1px;
-            height: 16px;
-            line-height: 16px;
-            max-width: 100%;
-            overflow: hidden;
-            /* fade out edges instead of hard cut */
-            mask-image: linear-gradient(
-                to right,
-                transparent 0%,
-                black 8%,
-                black 92%,
-                transparent 100%
-            );
-            -webkit-mask-image: linear-gradient(
-                to right,
-                transparent 0%,
-                black 8%,
-                black 92%,
-                transparent 100%
-            );
-        }
-    
-        /* --- PAUSE BUTTON --- */
-        #sys-pause-btn {
-            display: block !important;
-            font-size: 9px;
-            padding: 4px 10px;
-            letter-spacing: 1px;
-        }
-    
-        /* --- ARENA FLOOR: canvas on top, controls below --- */
-        #arena-floor {
-            flex-direction: column;
-            gap: 10px;
-        }
-    
-        /* --- CONTROL DECK: horizontal strip --- */
-        #control-deck {
-            flex-direction: row;
-            width: 100%;
-            height: auto;
-            padding: 14px 20px;
-            gap: 0;
-            justify-content: space-around;
-            align-items: center;
-            align-self: auto;
-            border-radius: 16px;
-        }
-    
-        .control-group {
-            width: auto;
-            align-items: center;
-        }
-    
-        .deck-label {
-            margin-bottom: 8px;
-            font-size: 10px;
-        }
-    
-        /* --- SPIN WIDGET --- */
-        #spin-widget {
-            width: 72px;
-            height: 72px;
-        }
-    
-        /* ----------------------------------------------------------------
-        POWER RAIL — PORTRAIT
-        Strategy: keep the rail VERTICAL (JS writes height + top so we
-        don't fight it), but give it sensible compact dimensions.
-        It sits in the horizontal control-deck alongside the spin widget.
-        ---------------------------------------------------------------- */
-        #power-rail-box {
-            /* reset any rotation from a previous attempt */
-            transform: none;
-            margin: 0;
-    
-            width: 30px;
-            height: 120px;
-            border-radius: 15px;
-            touch-action: none;
-        }
-    
-        /* Fill: grows downward from top (matches JS .style.height) */
-        #power-glow-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;          /* JS overrides this */
-            border-radius: 13px;
-            pointer-events: none;
-        }
-    
-        /* Handle: slides top-to-bottom (matches JS .style.top) */
-        #power-handle {
-            position: absolute;
-            top: 0%;             /* JS overrides this */
-            left: -7px;
-            width: 44px;
-            height: 18px;
-            border-radius: 10px;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
+    #game-container { padding: 8px; }
+ 
+    /* --- SCOREBOARD: auto height, hard clip so ticker never bleeds --- */
+    #scoreboard {
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        margin-bottom: 8px;
+        flex-wrap: nowrap;
+        gap: 6px;
+        align-items: stretch;
     }
+ 
+    /* --- PLAYER CARDS --- */
+    .player-card {
+        min-width: 0;
+        padding: 7px 8px;
+        flex: 1;
+        border-radius: 12px;
+    }
+ 
+    .player-name {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        margin-bottom: 3px;
+    }
+ 
+    .group-status {
+        font-size: 9px;
+        letter-spacing: 0.5px;
+    }
+ 
+    /* --- BALL TRAY --- */
+    .tray {
+        margin-top: 5px;
+        height: 11px;
+        gap: 0;
+        flex-wrap: nowrap;
+        justify-content: center;
+    }
+ 
+    .hud-ball {
+        width: 10px;
+        height: 10px;
+        margin: 0 2px;
+    }
+ 
+    .hud-ball.sunk {
+        width: 0;
+        margin: 0;
+    }
+ 
+    /* --- MIDDLE UI: clipped so ticker text can never escape --- */
+    #middle-ui {
+        min-width: 0;       /* allow shrinking */
+        flex: 1.2;
+        overflow: hidden;   /* hard wall — ticker text stays inside */
+    }
+ 
+    #game-title {
+        font-size: 16px;
+        letter-spacing: 4px;
+    }
+ 
+    #countdown-clock {
+        font-size: 12px;
+        letter-spacing: 2px;
+    }
+ 
+    /* Ticker: nowrap is fine now that the parent clips */
+    #status-ticker {
+        font-size: 9px;
+        letter-spacing: 1px;
+        height: 16px;
+        line-height: 16px;
+        max-width: 100%;
+        overflow: hidden;
+        /* fade out edges instead of hard cut */
+        mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 8%,
+            black 92%,
+            transparent 100%
+        );
+        -webkit-mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 8%,
+            black 92%,
+            transparent 100%
+        );
+    }
+ 
+    /* --- PAUSE BUTTON --- */
+    #sys-pause-btn {
+        display: block !important;
+        font-size: 9px;
+        padding: 4px 10px;
+        letter-spacing: 1px;
+    }
+ 
+    /* --- ARENA FLOOR: canvas on top, controls below --- */
+    #arena-floor {
+        flex-direction: column;
+        gap: 10px;
+    }
+ 
+    /* --- CONTROL DECK: horizontal strip --- */
+    #control-deck {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        padding: 14px 20px;
+        gap: 0;
+        justify-content: space-around;
+        align-items: center;
+        align-self: auto;
+        border-radius: 16px;
+    }
+ 
+    .control-group {
+        width: auto;
+        align-items: center;
+    }
+ 
+    .deck-label {
+        margin-bottom: 8px;
+        font-size: 10px;
+    }
+ 
+    /* --- SPIN WIDGET --- */
+    #spin-widget {
+        width: 72px;
+        height: 72px;
+    }
+ 
+    /* ----------------------------------------------------------------
+       POWER RAIL — PORTRAIT
+       Strategy: keep the rail VERTICAL (JS writes height + top so we
+       don't fight it), but give it sensible compact dimensions.
+       It sits in the horizontal control-deck alongside the spin widget.
+    ---------------------------------------------------------------- */
+    #power-rail-box {
+        /* reset any rotation from a previous attempt */
+        transform: none;
+        margin: 0;
+ 
+        width: 30px;
+        height: 120px;
+        border-radius: 15px;
+        touch-action: none;
+    }
+ 
+    /* Fill: grows downward from top (matches JS .style.height) */
+    #power-glow-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0%;          /* JS overrides this */
+        border-radius: 13px;
+        pointer-events: none;
+    }
+ 
+    /* Handle: slides top-to-bottom (matches JS .style.top) */
+    #power-handle {
+        position: absolute;
+        top: 0%;             /* JS overrides this */
+        left: -7px;
+        width: 44px;
+        height: 18px;
+        border-radius: 10px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+}
 
         /* ========================================= */
         /* --- MOBILE LANDSCAPE MODE (HORIZONTAL) --- */
@@ -1218,8 +1218,7 @@
     </div>
 
     <script>
-
-              // Disable Right-Click context menu
+// Disable Right-Click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         // Block common developer keyboard shortcuts
@@ -1496,8 +1495,7 @@
         let isPaused = false; 
         let gameLoopId = null; 
         let inputState = 'idle'; 
-        let aimAngle = 0;
-        let displayAimAngle = 0; // smoothly lerps toward aimAngle — used for drawing only
+        let aimAngle = 0; 
         let currentPower = 0; 
         let timeLeft = 15.0; 
         let shotClockInterval = null;
@@ -1814,8 +1812,7 @@
             p2Name = document.getElementById('p2-name-input').value.trim().toUpperCase() || "PLAYER 02";
 
             inputState = 'idle'; 
-            aimAngle = 0;
-            displayAimAngle = 0;
+            aimAngle = 0; 
             resetPowerUI(); 
             visualFx = []; 
             globalActiveColor = NEUTRAL_ACCENT;
@@ -2188,8 +2185,8 @@
             let moving = balls.some(b => b.active && (b.isSinking || Math.abs(b.vx) > 0.05 || Math.abs(b.vy) > 0.05));
             if (moving || matchEndCondition || shotActive || (isBallInHand && inputState === 'dragging_ball') || isPaused || !aimAssistEnabled) return null;
             
-            let dirX = Math.cos(displayAimAngle); 
-            let dirY = Math.sin(displayAimAngle); 
+            let dirX = Math.cos(aimAngle); 
+            let dirY = Math.sin(aimAngle); 
             let closestT = Infinity; 
             let closestBall = null;
 
@@ -2350,7 +2347,7 @@
             
             ctx.save(); 
             ctx.translate(cueBall.x, cueBall.y); 
-            ctx.rotate(displayAimAngle); 
+            ctx.rotate(aimAngle); 
             
             let pullBack = BALL_RADIUS + 8 + (currentPower * 0.5); 
             let cueLen = 250; 
@@ -2605,9 +2602,18 @@
             document.getElementById('power-handle').style.top = `${currentPower}%`;
         }
 
+        let previousTouchX = null;
+        let previousTouchY = null;
+
         function handleInputStart(e) {
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
+            
+            // Track start position for mobile rotation so it doesn't jump
+            if (e.touches && e.touches.length > 0) {
+                previousTouchX = e.touches[0].clientX;
+                previousTouchY = e.touches[0].clientY;
+            }
 
             let cx = e.touches ? e.touches[0].clientX : e.clientX; 
             let cy = e.touches ? e.touches[0].clientY : e.clientY;
@@ -2627,10 +2633,12 @@
             if (isBallInHand && Math.hypot(p.x - cueBall.x, p.y - cueBall.y) < BALL_RADIUS * 3) { 
                 inputState = 'dragging_ball'; 
             } else { 
-                inputState = 'aiming';
-                // Snap aim immediately to where the player touched/clicked.
-                // This is exactly how 8 Ball Pool works on both mobile and desktop.
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
+                inputState = 'aiming'; 
+                // DESKTOP: Snap aim immediately to the cursor. 
+                // MOBILE: Do not snap on tap, wait for swipe.
+                if (!e.touches) {
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                }
             }
         }
 
@@ -2649,7 +2657,7 @@
                 let clear = true;
                 for (let b of balls) { 
                     if (!b.active || b.num === 0) continue;
-                    if (b.x < -100 || b.y < -100) continue;
+                    if (b.x < -100 || b.y < -100) continue; // skip pocketed balls at sentinel coords
                     if (Math.hypot(prospectiveX - b.x, prospectiveY - b.y) < BALL_RADIUS * 2 + 2) { 
                         clear = false; 
                         break; 
@@ -2659,11 +2667,29 @@
                     cueBall.x = prospectiveX; 
                     cueBall.y = prospectiveY; 
                 }
-            } else if (inputState === 'aiming') {
-                // 8 Ball Pool style: aim angle = direction from cue ball to finger.
-                // Works identically on touch and mouse — no delta accumulation.
-                const p = parseCanvasCoords(e);
-                aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x);
+            } else if (inputState === 'aiming') { 
+                if (e.touches && e.touches.length > 0) {
+                    // MOBILE: 8-Ball Pool style swipe rotation
+                    const currentTouchX = e.touches[0].clientX;
+                    const currentTouchY = e.touches[0].clientY;
+                    
+                    if (previousTouchX !== null && previousTouchY !== null) {
+                        const deltaX = currentTouchX - previousTouchX;
+                        const deltaY = currentTouchY - previousTouchY;
+                        
+                        // Sensitivity: Adjust this to make it spin faster or slower when dragging
+                        const rotationSensitivity = 0.005; 
+                        
+                        aimAngle += (deltaX * rotationSensitivity) + (deltaY * rotationSensitivity);
+                    }
+                    
+                    previousTouchX = currentTouchX;
+                    previousTouchY = currentTouchY;
+                } else {
+                    // DESKTOP: Direct coordinate targeting
+                    const p = parseCanvasCoords(e); 
+                    aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
+                }
             }
         }
 
@@ -2683,6 +2709,10 @@
             } else if (inputState === 'aiming') { 
                 inputState = 'idle'; 
             }
+
+            // Reset touch tracking when finger is lifted
+            previousTouchX = null;
+            previousTouchY = null;
         }
 
         function fireShot() {
@@ -2754,16 +2784,6 @@
                 drawCueStick(); 
                 renderFx(ctx); 
                 return;
-            }
-
-            // Smoothly lerp the visual cue angle toward the true aim angle.
-            // This gives the cue stick the fluid gliding feel of 8 Ball Pool.
-            // Uses shortest-path interpolation so it never spins the long way round.
-            {
-                let diff = aimAngle - displayAimAngle;
-                while (diff >  Math.PI) diff -= 2 * Math.PI;
-                while (diff < -Math.PI) diff += 2 * Math.PI;
-                displayAimAngle += diff * 0.2;
             }
 
             let moving = false; 
@@ -3328,4 +3348,7 @@
     </script>
 </body>
 </html>
+
+    
+
 

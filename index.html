@@ -395,20 +395,29 @@
             align-items: center; 
             width: 100%; 
             margin-bottom: 20px; 
-            min-height: 90px; /* Reserves space so fouls don't push the canvas on desktop */
+            
+            /* STRICT LOCK: Never grow, never shrink */
+            height: 100px; 
+            min-height: 100px;
+            max-height: 100px;
+            flex-shrink: 0; 
+            box-sizing: border-box;
         }
 
         #middle-ui { 
             text-align: center; 
             min-width: 280px; 
+            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            min-height: 65px; /* Prevents the text box from collapsing */
+            justify-content: space-evenly; /* Spreads title, clock, and ticker evenly */
         }
 
         #status-ticker {
-            min-height: 25px; /* Keeps the line open even if the text clears entirely */
+            height: 20px;
+            line-height: 20px;
+            /* This is the magic rule: forces text to stay on one line so it CANNOT expand the box */
+            white-space: nowrap; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -721,7 +730,15 @@
         /* ========================================= */
         @media (max-width: 950px) and (orientation: portrait) {
             #game-container { padding: 10px; }
-            #scoreboard { margin-bottom: 10px; }
+            #scoreboard {
+                height: 110px; /* Locked height for phones */
+                min-height: 110px;
+                max-height: 110px;
+            }
+            #middle-ui {
+                min-height: 50px;
+            }
+           
             .player-card { min-width: 100px; padding: 8px 10px; }
             #arena-floor { flex-direction: column; gap: 15px; }
             #control-deck { 
@@ -754,8 +771,14 @@
             #game-container { padding: 5px 15px; }
 
             #scoreboard {
-                min-height: 50px; 
+                height: 60px; /* Tightly locked so horizontal canvas isn't squished */
+                min-height: 60px;
+                max-height: 60px;
                 margin-bottom: 5px;
+            }
+            
+            #status-ticker {
+                font-size: 11px; /* Slightly smaller text so it fits the single line */
             }
 
             #middle-ui {

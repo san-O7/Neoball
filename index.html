@@ -1501,6 +1501,7 @@
         let cueBallScratched = false; 
         let isBallInHand = false; 
         let shotActive = false; 
+        let lastProcessedShotTime = 0;
         let matchEndCondition = false;
         let isPaused = false; 
         let gameLoopId = null; 
@@ -2681,6 +2682,7 @@
         }
 
         function handleInputMove(e) {
+            if (currentRoomCode && !isMyTurn) return;
             if (matchEndCondition || isPaused) return;
             
             let cy = e.touches ? e.touches[0].clientY : e.clientY;
@@ -2777,12 +2779,15 @@
                     angle: aimAngle,
                     spinX: spinX,
                     spinY: spinY,
+                    // NEW: Send the exact starting position of the cue ball!
+                    cueX: cueBall.x,
+                    cueY: cueBall.y,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                // Immediately end your turn locally so you can't double-shoot
                 isMyTurn = false; 
             }
+
             // ───────────────────────────────────────────────────────
 
             resetPowerUI(); 
@@ -2794,15 +2799,23 @@
             // 1. Listen for opponent shots
             db.ref('rooms/' + code + '/gameState/lastShot').on('value', (snap) => {
                 const shotData = snap.val();
-                if (shotData && !isMyTurn) {
+                
+                // 🛡️ NEW: Only proceed if this shot has a newer timestamp than the last one we saw
+                if (shotData && !isMyTurn && shotData.timestamp > lastProcessedShotTime) {
+                    lastProcessedShotTime = shotData.timestamp; // Update our tracker
+                    
+                    if (shotData.cueX !== undefined && shotData.cueY !== undefined) {
+                        cueBall.x = shotData.cueX;
+                        cueBall.y = shotData.cueY;
+                    }
                     currentPower = shotData.power;
                     aimAngle = shotData.angle;
                     spinX = shotData.spinX || 0;
                     spinY = shotData.spinY || 0;
+                    
                     fireShot();
                 }
             });
-
             // 2. Listen for End-of-Turn sync data
             db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
                 const turnData = snap.val();
@@ -3268,6 +3281,15 @@
 
         // ── Launch Room (host creates it in Firebase) ───────────────────
         document.getElementById('btn-launch-room').addEventListener('click', async () => {
+
+            if (currentRoomCode) {
+            // Clear out any old physics data from previous tests before starting!
+            db.ref('rooms/' + currentRoomCode + '/gameState').remove();
+            
+            // Now set the room to ready to tell the guest to transition
+            db.ref('rooms/' + currentRoomCode).update({ status: 'ready' });
+        }
+
             initAudio(); 
             if (typeof sfx !== 'undefined') sfx.click();
 

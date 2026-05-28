@@ -1082,7 +1082,6 @@
         <div class="matrix-label">SELECT COLOR THEME</div>
         <div id="theme-matrix-grid"></div>
 
-
         <button id="start-btn" class="sys-btn">START GAME</button>
         <button id="btn-setup-back" class="sys-btn secondary">BACK TO MENU</button>
     </div>
@@ -2026,11 +2025,8 @@
                     let radSumSq = (b1.radius + b2.radius) ** 2;
                     
                     if (distSq < radSumSq) {
-                        // 👑 FIX: Only the Host acts as the official referee for rules tracking
-                        if (isRoomHost) {
-                            if (b1.type === 'cue' && firstBallHitThisTurn === null) firstBallHitThisTurn = b2.type; 
-                            if (b2.type === 'cue' && firstBallHitThisTurn === null) firstBallHitThisTurn = b1.type;
-                        }
+                        if (b1.type === 'cue' && firstBallHitThisTurn === null) firstBallHitThisTurn = b2.type; 
+                        if (b2.type === 'cue' && firstBallHitThisTurn === null) firstBallHitThisTurn = b1.type;
                         
                         let dist = Math.sqrt(distSq); 
                         let overlap = (b1.radius + b2.radius - dist); 
@@ -2923,93 +2919,58 @@
             });
         })();
 
-        let lastFrameTime = performance.now();
-        const physicsTimeStep = 1000 / 60; // 60Hz fixed time step
-        let physicsAccumulator = 0;
-
         function gameLoop() {
-            // Add these 3 time-tracking variables right ABOVE your game loop
-            let lastFrameTime = performance.now();
-            const physicsTimeStep = 1000 / 60; // Locks physics strictly to 60fps
-            let physicsAccumulator = 0;
-
-            function gameLoop(currentTime) {
-                // 1. Initialize time if it's the very first frame
-                if (!currentTime) currentTime = performance.now();
-                
-                // Request the next frame immediately
-                gameLoopId = requestAnimationFrame(gameLoop);
-                
-                // 2. Pause Menu Rendering (Bypasses physics)
-                if (isPaused) {
-                    drawCleanTable(); 
-                    drawAimSystem(calculateAimTrajectory());
-                    for (let b of balls) { if (b.type !== 'cue') b.draw(ctx); }
-                    for (let b of balls) { if (b.type === 'cue') b.draw(ctx); }
-                    drawCueStick(); 
-                    renderFx(ctx); 
-                    return;
-                }
-
-                // UI visual update (Runs as fast as the monitor, which is fine for colors)
-                globalActiveColor = lerpColor(globalActiveColor, getActivePlayerColor(), 0.05);
-
-                // 3. Time Math
-                let dt = currentTime - lastFrameTime;
-                if (dt > 250) dt = 250; // Prevents the game from exploding if you switch browser tabs
-                lastFrameTime = currentTime;
-                
-                physicsAccumulator += dt;
-                let moving = false; 
-
-                // ─── THE MATH (Physics Lockstep) ────────────────────────────
-                while (physicsAccumulator >= physicsTimeStep) {
-                    moving = false; // Reset tracker for this specific physics step
-                    
-                    for (let s = 0; s < PHYSICS_SUBSTEPS; s++) {
-                        resolveCollisions(); 
-                        resolveCushionsAndPockets();
-                        
-                        for (let b of balls) { 
-                            b.updatePos(PHYSICS_SUBSTEPS); 
-                            if (b.active && (b.isSinking || Math.abs(b.vx) > 0.01 || Math.abs(b.vy) > 0.01)) { 
-                                moving = true; 
-                            } 
-                        }
-                    }
-                    
-                    // Turn ending logic now runs securely inside the locked physics loop
-                    if (shotActive && !moving) { 
-                        shotActive = false; 
-                        if (isRoomHost) {
-                            processTurnEnd(); 
-                        } else {
-                            updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
-                        }
-                    }
-
-                    physicsAccumulator -= physicsTimeStep;
-                }
-                // ────────────────────────────────────────────────────────────
-
-                // ─── THE ART (Uncapped Monitor Framerate) ───────────────────
+            gameLoopId = requestAnimationFrame(gameLoop);
+            
+            if (isPaused) {
                 drawCleanTable(); 
                 drawAimSystem(calculateAimTrajectory());
-                
                 for (let b of balls) { if (b.type !== 'cue') b.draw(ctx); }
                 for (let b of balls) { if (b.type === 'cue') b.draw(ctx); }
-                
                 drawCueStick(); 
                 renderFx(ctx); 
+                return;
+            }
 
-                if (isBallInHand && !shotActive && inputState !== 'dragging_ball') {
-                    ctx.beginPath(); 
-                    ctx.arc(cueBall.x, cueBall.y, BALL_RADIUS * 1.5, 0, Math.PI * 2); 
-                    ctx.strokeStyle = globalActiveColor; 
-                    ctx.lineWidth = 2; 
-                    ctx.stroke();
+            let moving = false; 
+            globalActiveColor = lerpColor(globalActiveColor, getActivePlayerColor(), 0.05);
+            
+            for (let s = 0; s < PHYSICS_SUBSTEPS; s++) {
+                resolveCollisions(); 
+                resolveCushionsAndPockets();
+                
+                for (let b of balls) { 
+                    b.updatePos(PHYSICS_SUBSTEPS); 
+                    if (b.active && (b.isSinking || Math.abs(b.vx) > 0.01 || Math.abs(b.vy) > 0.01)) { 
+                        moving = true; 
+                    } 
                 }
-                // ────────────────────────────────────────────────────────────
+            }
+            
+            if (shotActive && !moving) { 
+                shotActive = false; 
+                if (isRoomHost) {
+                        processTurnEnd(); 
+                } else {
+                        updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
+                    }
+                }
+
+            drawCleanTable(); 
+            drawAimSystem(calculateAimTrajectory());
+            
+            for (let b of balls) { if (b.type !== 'cue') b.draw(ctx); }
+            for (let b of balls) { if (b.type === 'cue') b.draw(ctx); }
+            
+            drawCueStick(); 
+            renderFx(ctx); 
+
+            if (isBallInHand && !shotActive && inputState !== 'dragging_ball') {
+                ctx.beginPath(); 
+                ctx.arc(cueBall.x, cueBall.y, BALL_RADIUS * 1.5, 0, Math.PI * 2); 
+                ctx.strokeStyle = globalActiveColor; 
+                ctx.lineWidth = 2; 
+                ctx.stroke();
             }
         }
 

@@ -22,6 +22,16 @@
     <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        </script>
 
     <style>
         html { background-color: #020205; }
@@ -2606,6 +2616,7 @@
         let previousTouchY = null;
 
         function handleInputStart(e) {
+            if (!cueBall) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2992,13 +3003,14 @@
         // ══════════════════════════════════════════════════════════════════
 
         const firebaseConfig = {
-            apiKey:            "YOUR_API_KEY",
-            authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL:       "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-            projectId:         "YOUR_PROJECT_ID",
-            storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId:             "YOUR_APP_ID"
+            apiKey: "AIzaSyC2HSr6LycrhxDqioQ_12d0He04lqQyApc",
+            authDomain: "neoball-5.firebaseapp.com",
+            databaseURL: "https://neoball-5-default-rtdb.europe-west1.firebasedatabase.app", // 👈 ADD THIS LINE
+            projectId: "neoball-5",
+            storageBucket: "neoball-5.firebasestorage.app",
+            messagingSenderId: "701481338514",
+            appId: "1:701481338514:web:0f3b7509f88c117fe2884b",
+            measurementId: "G-T6TDF420P2"
         };
 
         let firebaseApp = null;
@@ -3007,7 +3019,19 @@
         function initFirebase() {
             if (db) return true;
             try {
-                firebaseApp = firebase.initializeApp(firebaseConfig);
+                // Check if the script tags are actually loaded
+                if (typeof firebase === 'undefined') {
+                    console.error('Firebase SDK is missing! Check your HTML script tags.');
+                    return false;
+                }
+                
+                // Prevent initializing twice if apps array already has an instance
+                if (!firebase.apps.length) {
+                    firebaseApp = firebase.initializeApp(firebaseConfig);
+                } else {
+                    firebaseApp = firebase.app();
+                }
+                
                 db = firebase.database();
                 return true;
             } catch(e) {
@@ -3015,6 +3039,9 @@
                 return false;
             }
         }
+
+        // Auto-initialize right away so 'db' is ready when the script sets up
+        initFirebase();
 
         // ── Room state ──────────────────────────────────────────────────
         let currentRoomCode   = null;
@@ -3141,7 +3168,9 @@
 
         // ── Launch Room (host creates it in Firebase) ───────────────────
         document.getElementById('btn-launch-room').addEventListener('click', async () => {
-            initAudio(); sfx.click();
+            initAudio(); 
+            if (typeof sfx !== 'undefined') sfx.click();
+
             if (!initFirebase()) {
                 alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
                 return;
@@ -3150,8 +3179,8 @@
             // Resolve room code
             let customVal = document.getElementById('custom-code-input').value.toUpperCase().trim();
             let code = customVal.length === 6 ? customVal
-                     : customVal.length > 0   ? customVal.padEnd(6, generateRoomCode()).substring(0, 6)
-                     : document.getElementById('create-room-code').textContent.replace(/·/g, '').padEnd(6, generateRoomCode()).substring(0, 6);
+                    : customVal.length > 0   ? customVal.padEnd(6, generateRoomCode()).substring(0, 6)
+                    : document.getElementById('create-room-code').textContent.replace(/·/g, '').padEnd(6, generateRoomCode()).substring(0, 6);
 
             const hostName = document.getElementById('room-host-name').value.trim() || 'PLAYER 01';
             localStorage.setItem('nb_p1Name', hostName);
@@ -3169,6 +3198,7 @@
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
+            // ─── YOUR TRY/CATCH BLOCK GOES INSIDE THIS ASYNC WRAPPER ───
             try {
                 // Prevent overwriting an active room
                 const existing = await db.ref('rooms/' + code).once('value');
@@ -3195,7 +3225,7 @@
                 console.error(err);
                 alert('Failed to create room:\n' + err.message);
             }
-        });
+        }); // ─── END OF ASSYNC WRAPPER ───
 
         function listenForOpponent(code) {
             if (activeRoomRef && activeRoomListener) activeRoomRef.off('value', activeRoomListener);

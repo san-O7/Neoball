@@ -2643,6 +2643,7 @@
         function handleInputStart(e) {
             if (!cueBall) return;
             if (currentRoomCode && !isMyTurn) return;
+            if (shotActive) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2806,6 +2807,9 @@
             db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
                 const turnData = snap.val();
                 if (turnData) {
+                    // 🛑 NEW: Force physics to stop simulating because the host declared the final layout
+                    shotActive = false; 
+
                     // Force the active player and game rules to match the host's decision
                     currentPlayer = turnData.activePlayer;
                     isBallInHand = turnData.isBallInHand;
@@ -2820,8 +2824,8 @@
                                 localBall.x = remoteBall.x;
                                 localBall.y = remoteBall.y;
                                 localBall.active = remoteBall.active;
-                                localBall.vx = 0;
-                                localBall.vy = 0;
+                                localBall.vx = 0; // Force stop speed
+                                localBall.vy = 0; // Force stop speed
                             }
                         });
                     }
@@ -2833,7 +2837,7 @@
                         isMyTurn = (currentPlayer === 2);
                     }
 
-                    // Update UI
+                    // Update UI safely
                     applyActivePlayerUI();
                     updateScoreboardDisplay();
                 }
@@ -2905,8 +2909,12 @@
             
             if (shotActive && !moving) { 
                 shotActive = false; 
-                processTurnEnd(); 
-            }
+                if (isRoomHost) {
+                        processTurnEnd(); 
+                } else {
+                        updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
+                    }
+                }
 
             drawCleanTable(); 
             drawAimSystem(calculateAimTrajectory());

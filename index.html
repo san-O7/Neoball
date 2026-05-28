@@ -1501,6 +1501,7 @@
         let cueBallScratched = false; 
         let isBallInHand = false; 
         let shotActive = false; 
+        let gameMatchStartTime = 0;
         let lastProcessedShotTime = 0;
         let matchEndCondition = false;
         let isPaused = false; 
@@ -2800,10 +2801,8 @@
             db.ref('rooms/' + code + '/gameState/lastShot').on('value', (snap) => {
                 const shotData = snap.val();
                 
-                // 🛡️ NEW: Only proceed if this shot has a newer timestamp than the last one we saw
-                if (shotData && !isMyTurn && shotData.timestamp > lastProcessedShotTime) {
-                    lastProcessedShotTime = shotData.timestamp; // Update our tracker
-                    
+                // 🛡️ Guard: Only accept shots from the current active match session
+                if (shotData && !isMyTurn && shotData.timestamp > gameMatchStartTime) {
                     if (shotData.cueX !== undefined && shotData.cueY !== undefined) {
                         cueBall.x = shotData.cueX;
                         cueBall.y = shotData.cueY;
@@ -2812,24 +2811,32 @@
                     aimAngle = shotData.angle;
                     spinX = shotData.spinX || 0;
                     spinY = shotData.spinY || 0;
-                    
                     fireShot();
                 }
             });
+
             // 2. Listen for End-of-Turn sync data
             db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
                 const turnData = snap.val();
-                if (turnData) {
-                    // 🛑 NEW: Force physics to stop simulating because the host declared the final layout
+                
+                // 🛡️ Guard: Only accept turn confirmations from the current active match session
+                if (turnData && turnData.timestamp && turnData.timestamp > gameMatchStartTime) {
                     shotActive = false; 
 
-                    // Force the active player and game rules to match the host's decision
+                    // Update referee rules state
                     currentPlayer = turnData.activePlayer;
                     isBallInHand = turnData.isBallInHand;
                     tableIsOpen = turnData.tableIsOpen;
                     playerGroups = turnData.groups || { 1: null, 2: null };
 
-                    // Snap all balls to their exact final positions
+                    // 🧼 NEW: Flush out local tracking flags so they don't corrupt the next turn
+                    firstBallHitThisTurn = null; 
+                    ballsPottedThisTurn = []; 
+                    cueBallScratched = false;
+                    railHitAfterContact = false;
+                    isBreakShot = false;
+
+                    // Snap all balls to their exact final positions and clear physics velocities
                     if (turnData.ballsPos) {
                         turnData.ballsPos.forEach(remoteBall => {
                             let localBall = balls.find(b => b.num === remoteBall.num);
@@ -2837,25 +2844,28 @@
                                 localBall.x = remoteBall.x;
                                 localBall.y = remoteBall.y;
                                 localBall.active = remoteBall.active;
-                                localBall.vx = 0; // Force stop speed
-                                localBall.vy = 0; // Force stop speed
+                                localBall.vx = 0;
+                                localBall.vy = 0;
+                                
+                                // Clean up any stuck local sinking animation variables
+                                localBall.isSinking = false;
+                                localBall.sinkScale = 1.0;
                             }
                         });
                     }
 
-                    // Figure out if I am allowed to shoot now
+                    // Determine local input authority
                     if (isRoomHost) {
                         isMyTurn = (currentPlayer === 1);
                     } else {
                         isMyTurn = (currentPlayer === 2);
                     }
 
-                    // Update UI safely
                     applyActivePlayerUI();
                     updateScoreboardDisplay();
                 }
             });
-        }
+}
 
         window.addEventListener('mousedown', handleInputStart); 
         window.addEventListener('mousemove', handleInputMove); 
@@ -3282,13 +3292,13 @@
         // ── Launch Room (host creates it in Firebase) ───────────────────
         document.getElementById('btn-launch-room').addEventListener('click', async () => {
 
-            if (currentRoomCode) {
-            // Clear out any old physics data from previous tests before starting!
-            db.ref('rooms/' + currentRoomCode + '/gameState').remove();
-            
-            // Now set the room to ready to tell the guest to transition
-            db.ref('rooms/' + currentRoomCode).update({ status: 'ready' });
-        }
+            if (currentRoomCode && db) {
+                try {
+                    // Completely wipe the game board node before setting status to 'ready'
+                    await db.ref('rooms/' + currentRoomCode + '/gameState').remove();
+                    await db.ref('rooms/' + currentRoomCode).update({ status: 'ready' });
+                } catch(e) { console.error(e); }
+            }
 
             initAudio(); 
             if (typeof sfx !== 'undefined') sfx.click();
@@ -3437,7 +3447,7 @@
 
             document.getElementById('game-container').style.display = 'flex';
             document.getElementById('sys-pause-btn').style.display  = 'block';
-            
+            gameMatchStartTime = Date.now()
             initLevel();
             
             // ─── NEW: START MULTIPLAYER SYNC ───

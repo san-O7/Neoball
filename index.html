@@ -2424,7 +2424,7 @@
                 msg = "FOUL: NO BALL HIT"; 
                 isBallInHand = true; 
             } else if (!tableIsOpen && firstBallHitThisTurn !== myGroup) { 
-                msg = `FOUL: WRONG BALL HIT (MUST HIT ${myGroup.toUpperCase()})`; 
+                msg = `FOUL: WRONG BALL HIT (MUST HIT ${myGroup ? myGroup.toUpperCase() : '?'})`; 
                 isBallInHand = true; 
             } else if (tableIsOpen && firstBallHitThisTurn === 'void') { 
                 msg = "FOUL: CANNOT HIT 8-BALL FIRST"; 
@@ -2483,6 +2483,31 @@
             } else if (!matchEndCondition) {
                 updateTickerMessage("DRAG TO AIM. PULL SLIDER TO SHOOT.");
             }
+
+            // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
+            if (currentRoomCode) {
+                // Collect exactly where every ball is to snap the other player's screen into sync
+                let syncBalls = balls.map(b => ({
+                    num: b.num, x: b.x, y: b.y, active: b.active
+                }));
+
+                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
+                    activePlayer: currentPlayer,
+                    isBallInHand: isBallInHand,
+                    tableIsOpen: tableIsOpen,
+                    groups: playerGroups,
+                    ballsPos: syncBalls,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Determine if it is MY turn locally based on my Host/Guest status
+                if (isRoomHost) {
+                    isMyTurn = (currentPlayer === 1); 
+                } else {
+                    isMyTurn = (currentPlayer === 2);
+                }
+            }
+            // ───────────────────────────────────────────────────────────────────
         }
 
         function applyActivePlayerUI() {
@@ -2617,6 +2642,7 @@
 
         function handleInputStart(e) {
             if (!cueBall) return;
+            if (currentRoomCode && !isMyTurn) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2741,12 +2767,77 @@
             cueBall.activeSpin = true;
 
             shotActive = true; 
-            
             clearInterval(shotClockInterval); 
+
+            // ─── MULTIPLAYER BROADCAST ─────────────────────────────
+            if (currentRoomCode && isMyTurn) {
+                db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').set({
+                    power: currentPower,
+                    angle: aimAngle,
+                    spinX: spinX,
+                    spinY: spinY,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Immediately end your turn locally so you can't double-shoot
+                isMyTurn = false; 
+            }
+            // ───────────────────────────────────────────────────────
+
             resetPowerUI(); 
-            
             spawnRippleFx(cueBall.x, cueBall.y, globalActiveColor); 
             updateTickerMessage("SHOT FIRED!");
+        }
+
+        function listenForGameUpdates(code) {
+            // 1. Listen for opponent shots
+            db.ref('rooms/' + code + '/gameState/lastShot').on('value', (snap) => {
+                const shotData = snap.val();
+                if (shotData && !isMyTurn) {
+                    currentPower = shotData.power;
+                    aimAngle = shotData.angle;
+                    spinX = shotData.spinX || 0;
+                    spinY = shotData.spinY || 0;
+                    fireShot();
+                }
+            });
+
+            // 2. Listen for End-of-Turn sync data
+            db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
+                const turnData = snap.val();
+                if (turnData) {
+                    // Force the active player and game rules to match the host's decision
+                    currentPlayer = turnData.activePlayer;
+                    isBallInHand = turnData.isBallInHand;
+                    tableIsOpen = turnData.tableIsOpen;
+                    playerGroups = turnData.groups || { 1: null, 2: null };
+
+                    // Snap all balls to their exact final positions
+                    if (turnData.ballsPos) {
+                        turnData.ballsPos.forEach(remoteBall => {
+                            let localBall = balls.find(b => b.num === remoteBall.num);
+                            if (localBall) {
+                                localBall.x = remoteBall.x;
+                                localBall.y = remoteBall.y;
+                                localBall.active = remoteBall.active;
+                                localBall.vx = 0;
+                                localBall.vy = 0;
+                            }
+                        });
+                    }
+
+                    // Figure out if I am allowed to shoot now
+                    if (isRoomHost) {
+                        isMyTurn = (currentPlayer === 1);
+                    } else {
+                        isMyTurn = (currentPlayer === 2);
+                    }
+
+                    // Update UI
+                    applyActivePlayerUI();
+                    updateScoreboardDisplay();
+                }
+            });
         }
 
         window.addEventListener('mousedown', handleInputStart); 
@@ -3044,6 +3135,7 @@
         initFirebase();
 
         // ── Room state ──────────────────────────────────────────────────
+        let isMyTurn = false;
         let currentRoomCode   = null;
         let isRoomHost        = false;
         let activeRoomRef     = null;
@@ -3311,9 +3403,24 @@
             document.getElementById('p2-name-input').value = (guestName || room.guest) || 'PLAYER 02';
 
             hideAllMenuPanels();
+            // ... previous startOnlineGame code
+
             document.getElementById('game-container').style.display = 'flex';
             document.getElementById('sys-pause-btn').style.display  = 'block';
+            
             initLevel();
+            
+            // ─── NEW: START MULTIPLAYER SYNC ───
+            if (isRoomHost) {
+                isMyTurn = true; // Host always shoots first
+                updateTickerMessage("YOUR TURN! DRAG TO AIM.");
+            } else {
+                isMyTurn = false; // Guest waits
+                updateTickerMessage("WAITING FOR OPPONENT...");
+            }
+            listenForGameUpdates(room.id || currentRoomCode); // Start listening to Firebase!
+            // ───────────────────────────────────
+            
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 

@@ -1530,7 +1530,9 @@
         let gameMatchStartTime = 0;
         let lastProcessedShotTime = 0;
         let matchEndCondition = false;
-        let isPaused = false; 
+        let isPaused = false;
+        let isOnlineGame = false;
+        let myPlayerNumber = 1; 
         let gameLoopId = null; 
         let inputState = 'idle'; 
         let aimAngle = 0; 
@@ -2672,6 +2674,7 @@
             if (!cueBall) return;
             if (currentRoomCode && !isMyTurn) return;
             if (shotActive) return;
+            if (isOnlineGame && currentPlayer !== myPlayerNumber) return; 
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2783,6 +2786,9 @@
         }
 
         function fireShot() {
+            initAudio();
+            if (shotActive || matchEndCondition || isPaused) return;
+
             isBallInHand = false; 
             let impulse = (currentPower / 100) * 28; 
             
@@ -2792,36 +2798,66 @@
             cueBall.vy = Math.sin(aimAngle) * impulse;
             
             cueBall.spinAngle = aimAngle;
-            cueBall.spinX = spinX;
-            cueBall.spinY = spinY;
+            cueBall.spinX = currentSpin.x; // Make sure these match your global spin variables!
+            cueBall.spinY = currentSpin.y;
             cueBall.activeSpin = true;
 
             shotActive = true; 
             clearInterval(shotClockInterval); 
 
-            // ─── MULTIPLAYER BROADCAST ─────────────────────────────
+            // ─── FIREBASE MULTIPLAYER BROADCAST ────────────────────
             if (currentRoomCode && isMyTurn) {
                 db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').set({
                     power: currentPower,
                     angle: aimAngle,
-                    spinX: spinX,
-                    spinY: spinY,
+                    spinX: currentSpin.x,
+                    spinY: currentSpin.y,
                     cueX: cueBall.x,
                     cueY: cueBall.y,
-                    // 🏷️ NEW: Stamp this shot with our identity!
-                    sender: isRoomHost ? 'host' : 'guest', 
+                    sender: myPlayerNumber === 1 ? 'host' : 'guest', // Identifies who shot
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                isMyTurn = false; 
+                isMyTurn = false; // Lock controls after shooting
             }
-
-
             // ───────────────────────────────────────────────────────
 
             resetPowerUI(); 
             spawnRippleFx(cueBall.x, cueBall.y, globalActiveColor); 
             updateTickerMessage("SHOT FIRED!");
+        }
+
+        function receiveOpponentShot(shotData) {
+            // 1. Force the remote player's choices onto our local game
+            aimAngle = shotData.angle;
+            currentPower = shotData.power;
+            currentSpin.x = shotData.spinX;
+            currentSpin.y = shotData.spinY;
+            
+            // Sync the cueball position just in case of slight desyncs
+            cueBall.x = shotData.cueX;
+            cueBall.y = shotData.cueY;
+            
+            // 2. Trigger the shot locally
+            fireShot(); 
+        }
+
+        function setupFirebaseShotListener() {
+            if (!currentRoomCode) return;
+
+            // Listen to the 'lastShot' node in Firebase for any changes
+            db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').on('value', (snapshot) => {
+                const shotData = snapshot.val();
+                if (!shotData) return;
+                
+                // Figure out our role
+                const myRole = (myPlayerNumber === 1) ? 'host' : 'guest';
+                
+                // If the shot we just downloaded was sent by the OTHER player, receive it!
+                if (shotData.sender !== myRole) {
+                    receiveOpponentShot(shotData);
+                }
+            });
         }
 
         function listenForGameUpdates(code) {
@@ -3209,7 +3245,7 @@
         initFirebase();
 
         // ── Room state ──────────────────────────────────────────────────
-        let isMyTurn = false;
+        let isMyTurn = true;
         let currentRoomCode   = null;
         let isRoomHost        = false;
         let activeRoomRef     = null;
@@ -3350,6 +3386,9 @@
                 alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
                 return;
             }
+             
+            isOnlineGame = true;
+            myPlayerNumber = 1;
 
             // Resolve room code
             let customVal = document.getElementById('custom-code-input').value.toUpperCase().trim();
@@ -3400,7 +3439,9 @@
                 console.error(err);
                 alert('Failed to create room:\n' + err.message);
             }
-        }); // ─── END OF ASSYNC WRAPPER ───
+            document.getElementById('create-room-screen').style.display = 'none';
+            gameLoop();
+        }); 
 
         function listenForOpponent(code) {
             if (activeRoomRef && activeRoomListener) activeRoomRef.off('value', activeRoomListener);
@@ -3423,6 +3464,9 @@
                 alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
                 return;
             }
+
+            isOnlineGame = true;
+            myPlayerNumber = 2;
 
             const code   = document.getElementById('join-code-input').value.trim().toUpperCase();
             const errEl  = document.getElementById('join-error-msg');
@@ -3455,6 +3499,7 @@
                 errEl.style.color = '#f43f5e';
                 errEl.textContent = '⚠  CONNECTION ERROR';
             }
+            document.getElementById('join-room-screen').style.display = 'none';
         });
 
         // Auto-uppercase + sanitise join input

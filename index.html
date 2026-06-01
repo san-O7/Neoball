@@ -1255,7 +1255,6 @@
     </div>
 
     <script>
-        // Disable Right-Click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         // Block common developer keyboard shortcuts
@@ -1568,43 +1567,12 @@
             spinReticle.style.top = `${(ny + 1) / 2 * 100}%`;
         }
 
-        spinWidget.addEventListener('mousedown', (e) => {
-            if (isOnlineMode && currentPlayer !== localPlayerId) return; 
-
-            isDraggingSpin = true; 
-            updateSpin(e); 
-            e.stopPropagation(); 
-        });
-
-        window.addEventListener('mousemove', (e) => { 
-            if (isDraggingSpin) {
-                if (isOnlineMode && currentPlayer !== localPlayerId) return;
-                updateSpin(e); 
-            }
-        });
-
-        window.addEventListener('mouseup', () => { 
-            isDraggingSpin = false; 
-        });
-
-        spinWidget.addEventListener('touchstart', (e) => {
-            if (isOnlineMode && currentPlayer !== localPlayerId) return; 
-
-            isDraggingSpin = true; 
-            updateSpin(e); 
-            e.stopPropagation(); 
-        }, {passive: false});
-
-        window.addEventListener('touchmove', (e) => { 
-            if (isDraggingSpin) {
-                if (isOnlineMode && currentPlayer !== localPlayerId) return;
-                updateSpin(e); 
-            }
-        }, {passive: false});
-
-        window.addEventListener('touchend', () => { 
-            isDraggingSpin = false; 
-        });
+        spinWidget.addEventListener('mousedown', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); });
+        window.addEventListener('mousemove', (e) => { if(isDraggingSpin) updateSpin(e); });
+        window.addEventListener('mouseup', () => { isDraggingSpin = false; });
+        spinWidget.addEventListener('touchstart', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); }, {passive: false});
+        window.addEventListener('touchmove', (e) => { if(isDraggingSpin) updateSpin(e); }, {passive: false});
+        window.addEventListener('touchend', () => { isDraggingSpin = false; });
 
         function preRenderCloth() {
             const dpr = window.devicePixelRatio || 1;
@@ -2042,7 +2010,6 @@
         }
 
         function evaluateVoidBallRules() {
-
             let oppName = currentPlayer === 1 ? p2Name : p1Name; 
             let pColor = currentPlayer === 1 ? colorP1 : colorP2; 
             let oppColor = currentPlayer === 1 ? colorP2 : colorP1;
@@ -2052,16 +2019,6 @@
                 showEndScreen("GAME OVER", `${oppName} WINS (8-BALL SANK ON BREAK)`, oppColor); 
                 return; 
             }
-
-            if (isOnlineMode) {
-            if (currentPlayer === localPlayerId) {
-                evaluateTurnOutcome(); 
-                pushGameStateToDatabase(); 
-            }
-           
-        } else {
-            evaluateTurnOutcome(); 
-        }
             
             let targetsLeft = balls.filter(b => b.active && b.type === playerGroups[currentPlayer]).length;
             
@@ -2713,10 +2670,7 @@
 
         function handleInputStart(e) {
             if (!cueBall) return;
-            
-            // MASTER ONLINE LOCK: Blocks the opponent from interacting at all
             if (currentRoomCode && !isMyTurn) return;
-            
             if (shotActive) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
@@ -2742,7 +2696,6 @@
             
             const p = parseCanvasCoords(e);
             
-            // If the ball is in hand AND we click near it, pick it up
             if (isBallInHand && Math.hypot(p.x - cueBall.x, p.y - cueBall.y) < BALL_RADIUS * 3) { 
                 inputState = 'dragging_ball'; 
             } else { 
@@ -3552,40 +3505,6 @@
             // ───────────────────────────────────
             
             gameLoopId = requestAnimationFrame(gameLoop);
-        }
-
-        function handleOpponentDisconnect(opponentName) {
-            matchEndCondition = true;
-            shotActive = false;
-            
-            // Trigger your built-in end screen function
-            showEndScreen("VICTORY", `${opponentName.toUpperCase()} HAS LEFT THE GAME.`, "#4ade80");
-            
-            if (typeof sfx !== 'undefined' && sfx.win) {
-                sfx.win();
-            }
-        }
-
-        function listenForGameUpdates(roomCode) {
-            activeRoomRef = db.ref('rooms/' + roomCode);
-            
-            activeRoomListener = activeRoomRef.on('value', (snapshot) => {
-                const roomData = snapshot.val();
-                
-                // 1. AUTO-WIN CHECK: If the room was deleted or opponent vanished
-                if (!roomData) {
-                    // Figure out the opponent's name based on who is local
-                    let opponentName = isRoomHost ? 
-                        document.getElementById('p2-name-input').value : 
-                        document.getElementById('p1-name-input').value;
-                    
-                    handleOpponentDisconnect(opponentName || "OPPONENT");
-                    
-                    // Stop listening to the deleted room
-                    activeRoomRef.off('value', activeRoomListener);
-                    return;
-                }
-            });
         }
 
         // ── Cancel Room (host cancels from waiting screen) ──────────────

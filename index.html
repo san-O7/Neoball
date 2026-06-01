@@ -38,7 +38,9 @@
         body {
             margin: 0;
             padding: 0;
+            /* Stretch into the iPhone notch area */
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+
             background: radial-gradient(circle at center, #0c0d19 0%, #020205 100%);
             color: #ffffff;
             font-family: 'Orbitron', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -48,7 +50,7 @@
             min-height: 100vh;
             overflow: hidden;
             user-select: none;
-        
+            touch-action: none;
         }
 
         /* Generic Menu Panel Styling */
@@ -62,15 +64,11 @@
             text-align: center;
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(56, 189, 248, 0.05);
             width: 440px;
-            max-width: 90vw;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden; 
-        }
-        .menu-panel > * {
-            flex-shrink: 0;
+            overflow: hidden;
         }
 
         /* Animated Background Grid for Menus */
@@ -222,10 +220,7 @@
         
         #theme-matrix-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            margin-bottom: 30px; 
-            max-height: 320px; 
-            min-height: 180px; 
-            overflow-y: auto;
+            margin-bottom: 30px; max-height: 200px; overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
 
@@ -310,25 +305,9 @@
             100% { transform: scale(2.2); opacity: 0; }
         }
 
-        #create-room-screen { 
-            max-height: 90vh; 
-            overflow-y: auto; 
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: #38bdf8 rgba(0, 0, 0, 0.3);
-        }
-        #create-room-screen::-webkit-scrollbar { width: 6px; }
-        #create-room-screen::-webkit-scrollbar-thumb { background: #38bdf8; 
-            border-radius: 4px; 
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); 
-        } 
-        #create-room-screen::-webkit-scrollbar-track { 
-            background: rgba(0, 0, 0, 0.3); 
-            border-radius: 4px; 
-        }
-        #create-room-screen::-webkit-scrollbar-thumb:hover {
-            background: #ffffff; 
-        }
+        #create-room-screen { max-height: 90vh; overflow-y: auto; }
+        #create-room-screen::-webkit-scrollbar { width: 4px; }
+        #create-room-screen::-webkit-scrollbar-thumb { background: #1e2445; border-radius: 4px; }
 
         .join-code-input {
             font-size: 28px !important; letter-spacing: 10px !important;
@@ -337,10 +316,7 @@
 
         #room-theme-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            margin-bottom: 20px; 
-            max-height: 320px; 
-            min-height: 180px; 
-            overflow-y: auto;
+            margin-bottom: 20px; max-height: 200px; overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
 
@@ -416,12 +392,11 @@
             display: none; 
             flex-direction: column; 
             width: 100%; 
-            height: 100vh;
-            height: 100dvh; 
+            height: 100vh; /* Fallback for old browsers */
+            height: 100dvh; /* Automatically resizes when toolbars vanish! */
             max-width: 1200px; 
             padding: 15px; 
             box-sizing: border-box;
-            touch-action: none; 
         }
 
        #scoreboard { 
@@ -698,8 +673,6 @@
                 linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
             background-size: 20px 20px;
-            height: fit-content; 
-            align-self: center;
         }
 
         .control-group {
@@ -1255,6 +1228,7 @@
     </div>
 
     <script>
+// Disable Right-Click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         // Block common developer keyboard shortcuts
@@ -1530,9 +1504,7 @@
         let gameMatchStartTime = 0;
         let lastProcessedShotTime = 0;
         let matchEndCondition = false;
-        let isPaused = false;
-        let isOnlineGame = false;
-        let myPlayerNumber = 1; 
+        let isPaused = false; 
         let gameLoopId = null; 
         let inputState = 'idle'; 
         let aimAngle = 0; 
@@ -2674,7 +2646,6 @@
             if (!cueBall) return;
             if (currentRoomCode && !isMyTurn) return;
             if (shotActive) return;
-            if (isOnlineGame && currentPlayer !== myPlayerNumber) return; 
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             
@@ -2786,9 +2757,6 @@
         }
 
         function fireShot() {
-            initAudio();
-            if (shotActive || matchEndCondition || isPaused) return;
-
             isBallInHand = false; 
             let impulse = (currentPower / 100) * 28; 
             
@@ -2798,66 +2766,36 @@
             cueBall.vy = Math.sin(aimAngle) * impulse;
             
             cueBall.spinAngle = aimAngle;
-            cueBall.spinX = currentSpin.x; // Make sure these match your global spin variables!
-            cueBall.spinY = currentSpin.y;
+            cueBall.spinX = spinX;
+            cueBall.spinY = spinY;
             cueBall.activeSpin = true;
 
             shotActive = true; 
             clearInterval(shotClockInterval); 
 
-            // ─── FIREBASE MULTIPLAYER BROADCAST ────────────────────
+            // ─── MULTIPLAYER BROADCAST ─────────────────────────────
             if (currentRoomCode && isMyTurn) {
                 db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').set({
                     power: currentPower,
                     angle: aimAngle,
-                    spinX: currentSpin.x,
-                    spinY: currentSpin.y,
+                    spinX: spinX,
+                    spinY: spinY,
                     cueX: cueBall.x,
                     cueY: cueBall.y,
-                    sender: myPlayerNumber === 1 ? 'host' : 'guest', // Identifies who shot
+                    // 🏷️ NEW: Stamp this shot with our identity!
+                    sender: isRoomHost ? 'host' : 'guest', 
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                isMyTurn = false; // Lock controls after shooting
+                isMyTurn = false; 
             }
+
+
             // ───────────────────────────────────────────────────────
 
             resetPowerUI(); 
             spawnRippleFx(cueBall.x, cueBall.y, globalActiveColor); 
             updateTickerMessage("SHOT FIRED!");
-        }
-
-        function receiveOpponentShot(shotData) {
-            // 1. Force the remote player's choices onto our local game
-            aimAngle = shotData.angle;
-            currentPower = shotData.power;
-            currentSpin.x = shotData.spinX;
-            currentSpin.y = shotData.spinY;
-            
-            // Sync the cueball position just in case of slight desyncs
-            cueBall.x = shotData.cueX;
-            cueBall.y = shotData.cueY;
-            
-            // 2. Trigger the shot locally
-            fireShot(); 
-        }
-
-        function setupFirebaseShotListener() {
-            if (!currentRoomCode) return;
-
-            // Listen to the 'lastShot' node in Firebase for any changes
-            db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').on('value', (snapshot) => {
-                const shotData = snapshot.val();
-                if (!shotData) return;
-                
-                // Figure out our role
-                const myRole = (myPlayerNumber === 1) ? 'host' : 'guest';
-                
-                // If the shot we just downloaded was sent by the OTHER player, receive it!
-                if (shotData.sender !== myRole) {
-                    receiveOpponentShot(shotData);
-                }
-            });
         }
 
         function listenForGameUpdates(code) {
@@ -3073,7 +3011,7 @@
             localStorage.setItem('nb_aimAssist', aimAssistEnabled);
             
             if (aimAssistEnabled) { 
-                this.classList.remove('off');   
+                this.classList.remove('off'); 
                 this.innerText = 'ENABLED'; 
             } else { 
                 this.classList.add('off'); 
@@ -3245,7 +3183,7 @@
         initFirebase();
 
         // ── Room state ──────────────────────────────────────────────────
-        let isMyTurn = true;
+        let isMyTurn = false;
         let currentRoomCode   = null;
         let isRoomHost        = false;
         let activeRoomRef     = null;
@@ -3386,9 +3324,6 @@
                 alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
                 return;
             }
-             
-            isOnlineGame = true;
-            myPlayerNumber = 1;
 
             // Resolve room code
             let customVal = document.getElementById('custom-code-input').value.toUpperCase().trim();
@@ -3439,9 +3374,7 @@
                 console.error(err);
                 alert('Failed to create room:\n' + err.message);
             }
-            document.getElementById('create-room-screen').style.display = 'none';
-            gameLoop();
-        }); 
+        }); // ─── END OF ASSYNC WRAPPER ───
 
         function listenForOpponent(code) {
             if (activeRoomRef && activeRoomListener) activeRoomRef.off('value', activeRoomListener);
@@ -3464,9 +3397,6 @@
                 alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
                 return;
             }
-
-            isOnlineGame = true;
-            myPlayerNumber = 2;
 
             const code   = document.getElementById('join-code-input').value.trim().toUpperCase();
             const errEl  = document.getElementById('join-error-msg');
@@ -3499,7 +3429,6 @@
                 errEl.style.color = '#f43f5e';
                 errEl.textContent = '⚠  CONNECTION ERROR';
             }
-            document.getElementById('join-room-screen').style.display = 'none';
         });
 
         // Auto-uppercase + sanitise join input
@@ -3615,5 +3544,4 @@
 </html>
 
     
-
 

@@ -38,9 +38,7 @@
         body {
             margin: 0;
             padding: 0;
-            /* Stretch into the iPhone notch area */
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-
             background: radial-gradient(circle at center, #0c0d19 0%, #020205 100%);
             color: #ffffff;
             font-family: 'Orbitron', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -50,7 +48,7 @@
             min-height: 100vh;
             overflow: hidden;
             user-select: none;
-            touch-action: none;
+        
         }
 
         /* Generic Menu Panel Styling */
@@ -64,11 +62,15 @@
             text-align: center;
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(56, 189, 248, 0.05);
             width: 440px;
+            max-width: 90vw;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow: hidden;
+            overflow: hidden; 
+        }
+        .menu-panel > * {
+            flex-shrink: 0;
         }
 
         /* Animated Background Grid for Menus */
@@ -220,7 +222,10 @@
         
         #theme-matrix-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            margin-bottom: 30px; max-height: 200px; overflow-y: auto;
+            margin-bottom: 30px; 
+            max-height: 320px; 
+            min-height: 180px; 
+            overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
 
@@ -305,9 +310,25 @@
             100% { transform: scale(2.2); opacity: 0; }
         }
 
-        #create-room-screen { max-height: 90vh; overflow-y: auto; }
-        #create-room-screen::-webkit-scrollbar { width: 4px; }
-        #create-room-screen::-webkit-scrollbar-thumb { background: #1e2445; border-radius: 4px; }
+        #create-room-screen { 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: #38bdf8 rgba(0, 0, 0, 0.3);
+        }
+        #create-room-screen::-webkit-scrollbar { width: 6px; }
+        #create-room-screen::-webkit-scrollbar-thumb { background: #38bdf8; 
+            border-radius: 4px; 
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); 
+        } 
+        #create-room-screen::-webkit-scrollbar-track { 
+            background: rgba(0, 0, 0, 0.3); 
+            border-radius: 4px; 
+        }
+        #create-room-screen::-webkit-scrollbar-thumb:hover {
+            background: #ffffff; 
+        }
 
         .join-code-input {
             font-size: 28px !important; letter-spacing: 10px !important;
@@ -316,7 +337,10 @@
 
         #room-theme-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            margin-bottom: 20px; max-height: 200px; overflow-y: auto;
+            margin-bottom: 20px; 
+            max-height: 320px; 
+            min-height: 180px; 
+            overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
 
@@ -392,11 +416,12 @@
             display: none; 
             flex-direction: column; 
             width: 100%; 
-            height: 100vh; /* Fallback for old browsers */
-            height: 100dvh; /* Automatically resizes when toolbars vanish! */
+            height: 100vh;
+            height: 100dvh; 
             max-width: 1200px; 
             padding: 15px; 
             box-sizing: border-box;
+            touch-action: none; 
         }
 
        #scoreboard { 
@@ -673,6 +698,8 @@
                 linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
             background-size: 20px 20px;
+            height: fit-content; 
+            align-self: center;
         }
 
         .control-group {
@@ -1228,7 +1255,7 @@
     </div>
 
     <script>
-// Disable Right-Click context menu
+        // Disable Right-Click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         // Block common developer keyboard shortcuts
@@ -1541,12 +1568,43 @@
             spinReticle.style.top = `${(ny + 1) / 2 * 100}%`;
         }
 
-        spinWidget.addEventListener('mousedown', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); });
-        window.addEventListener('mousemove', (e) => { if(isDraggingSpin) updateSpin(e); });
-        window.addEventListener('mouseup', () => { isDraggingSpin = false; });
-        spinWidget.addEventListener('touchstart', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); }, {passive: false});
-        window.addEventListener('touchmove', (e) => { if(isDraggingSpin) updateSpin(e); }, {passive: false});
-        window.addEventListener('touchend', () => { isDraggingSpin = false; });
+        spinWidget.addEventListener('mousedown', (e) => {
+            if (isOnlineMode && currentPlayer !== localPlayerId) return; 
+
+            isDraggingSpin = true; 
+            updateSpin(e); 
+            e.stopPropagation(); 
+        });
+
+        window.addEventListener('mousemove', (e) => { 
+            if (isDraggingSpin) {
+                if (isOnlineMode && currentPlayer !== localPlayerId) return;
+                updateSpin(e); 
+            }
+        });
+
+        window.addEventListener('mouseup', () => { 
+            isDraggingSpin = false; 
+        });
+
+        spinWidget.addEventListener('touchstart', (e) => {
+            if (isOnlineMode && currentPlayer !== localPlayerId) return; 
+
+            isDraggingSpin = true; 
+            updateSpin(e); 
+            e.stopPropagation(); 
+        }, {passive: false});
+
+        window.addEventListener('touchmove', (e) => { 
+            if (isDraggingSpin) {
+                if (isOnlineMode && currentPlayer !== localPlayerId) return;
+                updateSpin(e); 
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchend', () => { 
+            isDraggingSpin = false; 
+        });
 
         function preRenderCloth() {
             const dpr = window.devicePixelRatio || 1;
@@ -1984,6 +2042,7 @@
         }
 
         function evaluateVoidBallRules() {
+
             let oppName = currentPlayer === 1 ? p2Name : p1Name; 
             let pColor = currentPlayer === 1 ? colorP1 : colorP2; 
             let oppColor = currentPlayer === 1 ? colorP2 : colorP1;
@@ -1993,6 +2052,16 @@
                 showEndScreen("GAME OVER", `${oppName} WINS (8-BALL SANK ON BREAK)`, oppColor); 
                 return; 
             }
+
+            if (isOnlineMode) {
+            if (currentPlayer === localPlayerId) {
+                evaluateTurnOutcome(); 
+                pushGameStateToDatabase(); 
+            }
+           
+        } else {
+            evaluateTurnOutcome(); 
+        }
             
             let targetsLeft = balls.filter(b => b.active && b.type === playerGroups[currentPlayer]).length;
             
@@ -2644,7 +2713,10 @@
 
         function handleInputStart(e) {
             if (!cueBall) return;
+            
+            // MASTER ONLINE LOCK: Blocks the opponent from interacting at all
             if (currentRoomCode && !isMyTurn) return;
+            
             if (shotActive) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
@@ -2670,6 +2742,7 @@
             
             const p = parseCanvasCoords(e);
             
+            // If the ball is in hand AND we click near it, pick it up
             if (isBallInHand && Math.hypot(p.x - cueBall.x, p.y - cueBall.y) < BALL_RADIUS * 3) { 
                 inputState = 'dragging_ball'; 
             } else { 
@@ -3011,7 +3084,7 @@
             localStorage.setItem('nb_aimAssist', aimAssistEnabled);
             
             if (aimAssistEnabled) { 
-                this.classList.remove('off'); 
+                this.classList.remove('off');   
                 this.innerText = 'ENABLED'; 
             } else { 
                 this.classList.add('off'); 
@@ -3479,6 +3552,40 @@
             // ───────────────────────────────────
             
             gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function handleOpponentDisconnect(opponentName) {
+            matchEndCondition = true;
+            shotActive = false;
+            
+            // Trigger your built-in end screen function
+            showEndScreen("VICTORY", `${opponentName.toUpperCase()} HAS LEFT THE GAME.`, "#4ade80");
+            
+            if (typeof sfx !== 'undefined' && sfx.win) {
+                sfx.win();
+            }
+        }
+
+        function listenForGameUpdates(roomCode) {
+            activeRoomRef = db.ref('rooms/' + roomCode);
+            
+            activeRoomListener = activeRoomRef.on('value', (snapshot) => {
+                const roomData = snapshot.val();
+                
+                // 1. AUTO-WIN CHECK: If the room was deleted or opponent vanished
+                if (!roomData) {
+                    // Figure out the opponent's name based on who is local
+                    let opponentName = isRoomHost ? 
+                        document.getElementById('p2-name-input').value : 
+                        document.getElementById('p1-name-input').value;
+                    
+                    handleOpponentDisconnect(opponentName || "OPPONENT");
+                    
+                    // Stop listening to the deleted room
+                    activeRoomRef.off('value', activeRoomListener);
+                    return;
+                }
+            });
         }
 
         // ── Cancel Room (host cancels from waiting screen) ──────────────

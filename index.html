@@ -1525,8 +1525,7 @@
         let isBreakShot = true; 
         let firstBallHitThisTurn = null; 
         let ballsPottedThisTurn = [];
-        let cueBallScratched = false;
-        let didIShootThisTurn = false; 
+        let cueBallScratched = false; 
         let isBallInHand = false; 
         let shotActive = false;
         let gameMatchStartTime = 0;
@@ -1569,9 +1568,9 @@
             spinReticle.style.top = `${(ny + 1) / 2 * 100}%`;
         }
 
-        spinWidget.addEventListener('mousedown', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); });
-        window.addEventListener('mousemove', (e) => { if(isDraggingSpin) updateSpin(e); });
-        window.addEventListener('mouseup', () => { isDraggingSpin = false; });
+        spinWidget.addEventListener('mousedown', (e) => { if (currentRoomCode && !isMyTurn) return; isDraggingSpin = true; updateSpin(e); e.stopPropagation(); });
+        window.addEventListener('mousemove', (e) => {if (currentRoomCode && !isMyTurn) return; if(isDraggingSpin) updateSpin(e); });
+        window.addEventListener('mouseup', () => {if (currentRoomCode && !isMyTurn) return; isDraggingSpin = false; });
         spinWidget.addEventListener('touchstart', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); }, {passive: false});
         window.addEventListener('touchmove', (e) => { if(isDraggingSpin) updateSpin(e); }, {passive: false});
         window.addEventListener('touchend', () => { isDraggingSpin = false; });
@@ -1897,17 +1896,25 @@
         function startShotClock() {
             clearInterval(shotClockInterval); 
             if (matchEndCondition) return; 
+    
+            timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0; 
             
-            timeLeft = roomTimerDuration; 
             updateClockUI();
             
             shotClockInterval = setInterval(() => {
                 if (!shotActive && !matchEndCondition && !isBallInHand && !isPaused) {
                     timeLeft -= 0.1;
+                    
                     if (timeLeft <= 0) { 
                         timeLeft = 0; 
                         clearInterval(shotClockInterval); 
-                        handleTimeoutFoul(); 
+                        
+                        // ─── MULTIPLAYER FIX ───
+                        // Only the player whose turn it currently is can declare a timeout foul!
+                        if (!currentRoomCode || (currentRoomCode && isMyTurn)) {
+                            handleTimeoutFoul(); 
+                        }
+                        // ───────────────────────
                     }
                     updateClockUI();
                 }
@@ -1944,30 +1951,6 @@
             firstBallHitThisTurn = null; 
             ballsPottedThisTurn = []; 
             cueBallScratched = false;
-
-            if (currentRoomCode && isMyTurn) {
-                let syncBalls = balls.map(b => ({
-                    num: b.num, x: b.x, y: b.y, active: b.active
-                }));
-
-                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
-                    activePlayer: currentPlayer, 
-                    isBallInHand: isBallInHand,   
-                    tableIsOpen: tableIsOpen,
-                    groups: playerGroups,
-                    ballsPos: syncBalls,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
-    
-            // Recalculate local turn permissions safely
-            if (currentRoomCode) {
-                if (isRoomHost) {
-                    isMyTurn = (currentPlayer === 1); 
-                } else {
-                    isMyTurn = (currentPlayer === 2);
-                }
-            }
             
             applyActivePlayerUI(); 
             updateScoreboardDisplay(); 
@@ -2443,19 +2426,6 @@
         }
 
         function processTurnEnd() {
-            // ─── MULTIPLAYER RACE-CONDITION FIX (ISSUE 1) ───
-            // If we are playing online and it is NOT my turn, do NOT calculate turn logic locally.
-            // Exit early and wait for the shooter's Firebase update to handle it.
-            if (currentRoomCode && !isMyTurn) {
-                isBreakShot = false; 
-                firstBallHitThisTurn = null; 
-                ballsPottedThisTurn = []; 
-                cueBallScratched = false;
-                railHitAfterContact = false;
-                return; 
-            }
-            didIShootThisTurn = false;
-
             let nextPlayer = currentPlayer === 1 ? 2 : 1; 
             let switchTurn = true; 
             let msg = ""; 
@@ -2553,21 +2523,19 @@
 
             // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
             if (currentRoomCode) {
-                // Only the player whose turn it WAS is allowed to sync the results!
-                if (isMyTurn) {
-                    let syncBalls = balls.map(b => ({
-                        num: b.num, x: b.x, y: b.y, active: b.active
-                    }));
+                // Collect exactly where every ball is to snap the other player's screen into sync
+                let syncBalls = balls.map(b => ({
+                    num: b.num, x: b.x, y: b.y, active: b.active
+                }));
 
-                    db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
-                        activePlayer: currentPlayer,
-                        isBallInHand: isBallInHand,
-                        tableIsOpen: tableIsOpen,
-                        groups: playerGroups,
-                        ballsPos: syncBalls,
-                        timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
+                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
+                    activePlayer: currentPlayer,
+                    isBallInHand: isBallInHand,
+                    tableIsOpen: tableIsOpen,
+                    groups: playerGroups,
+                    ballsPos: syncBalls,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
 
                 // Determine if it is MY turn locally based on my Host/Guest status
                 if (isRoomHost) {
@@ -2576,6 +2544,7 @@
                     isMyTurn = (currentPlayer === 2);
                 }
             }
+            // ───────────────────────────────────────────────────────────────────
         }
 
         function applyActivePlayerUI() {
@@ -2838,9 +2807,6 @@
 
             shotActive = true; 
             clearInterval(shotClockInterval); 
-            if (!currentRoomCode || (currentRoomCode && isMyTurn)) {
-                didIShootThisTurn = true;
-            }
 
             // ─── MULTIPLAYER BROADCAST ─────────────────────────────
             if (currentRoomCode && isMyTurn) {
@@ -2906,7 +2872,6 @@
                 if (turnData) {
                     shotActive = false; 
 
-                    // ─── ABSOLUTE TURN AUTHORITY ───
                     currentPlayer = turnData.activePlayer;
                     isBallInHand = turnData.isBallInHand;
                     tableIsOpen = turnData.tableIsOpen;
@@ -2942,31 +2907,13 @@
                         });
                     }
 
-                    // Recalculate my turn permission based on the NEW currentPlayer
                     if (isRoomHost) {
                         isMyTurn = (currentPlayer === 1);
                     } else {
                         isMyTurn = (currentPlayer === 2);
                     }
 
-                    // ─── CRITICAL UPDATE FOR UI AND INPUTS ───
                     applyActivePlayerUI();
-                    updateScoreboardDisplay();
-                    
-                    // Reset the shot clock for the new turn
-                    startShotClock(); 
-
-                    // Update the on-screen ticker so the player knows what to do
-                    if (isMyTurn) {
-                        if (isBallInHand) {
-                            updateTickerMessage("BALL IN HAND: DRAG WHITE BALL TO PLACE");
-                        } else {
-                            updateTickerMessage("YOUR TURN! DRAG TO AIM.");
-                        }
-                    } else {
-                        updateTickerMessage(`${currentPlayer === 1 ? p1Name : p2Name}'S TURN`);
-                    }
-                     applyActivePlayerUI();
                     updateScoreboardDisplay();
                 }
             });
@@ -2986,7 +2933,7 @@
         (function() {
             const rail = document.getElementById('power-rail-box');
             rail.addEventListener('pointerdown', function(e) {
-                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
+                if (currentRoomCode && !isMyTurn) return;
                 if (shotActive || matchEndCondition || isPaused) return;
                 initAudio();
                 inputState = 'charging';
@@ -2995,12 +2942,12 @@
                 e.stopPropagation();
             });
             rail.addEventListener('pointermove', function(e) {
-                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
+                if (currentRoomCode && !isMyTurn) return;
                 if (inputState !== 'charging') return;
                 updatePowerFromY(e.clientY, this.getBoundingClientRect());
             });
             rail.addEventListener('pointerup', function(e) {
-                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
+                if (currentRoomCode && !isMyTurn) return;
                 if (inputState !== 'charging') return;
                 if (currentPower > 5) { fireShot(); } else { resetPowerUI(); }
                 inputState = 'idle';
@@ -3046,7 +2993,6 @@
                         updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
                     }
                 }
-
             drawCleanTable(); 
             drawAimSystem(calculateAimTrajectory());
             
@@ -3522,6 +3468,19 @@
             }
         });
 
+        db.ref('rooms/' + currentRoomCode + '/players').on('child_removed', () => {
+            if (!matchEndCondition) {
+                matchEndCondition = true;
+                shotActive = false;
+                clearInterval(shotClockInterval);
+                
+                // Show victory on the ticker
+                updateTickerMessage("OPPONENT DISCONNECTED! YOU WIN.");
+                
+                // You can also trigger your end-game UI screen here
+            }
+        });
+
         // Auto-uppercase + sanitise join input
         document.getElementById('join-code-input').addEventListener('input', function() {
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
@@ -3543,9 +3502,6 @@
                 selectedThemeIdx = s.themeIdx;
                 colorP1 = THEME_PRESETS[s.themeIdx].p1;
                 colorP2 = THEME_PRESETS[s.themeIdx].p2;
-            }
-            if (s.shotClock !== undefined) {
-                     roomTimerDuration = s.shotClock; 
             }
             preRenderCloth();
 
@@ -3569,45 +3525,8 @@
                 isMyTurn = false; // Guest waits
                 updateTickerMessage("WAITING FOR OPPONENT...");
             }
-            listenForGameUpdates(room.id || currentRoomCode); 
-            // ─── NEW: START MULTIPLAYER SYNC ───
-            if (isRoomHost) {
-                isMyTurn = true; 
-                updateTickerMessage("YOUR TURN! DRAG TO AIM.");
-            } else {
-                isMyTurn = false; 
-                updateTickerMessage("WAITING FOR OPPONENT...");
-            }
-            listenForGameUpdates(room.id || currentRoomCode); 
-            
-
-            db.ref('rooms/' + currentRoomCode).onDisconnect().remove();
-
-            // Listen to see if the room gets deleted (meaning the OPPONENT dropped)
-            db.ref('rooms/' + currentRoomCode).on('value', (snap) => {
-                if (!snap.exists() && !matchEndCondition) {
-                    // Room was deleted by the opponent leaving
-                    matchEndCondition = true; 
-                    if (typeof shotClockInterval !== 'undefined') clearInterval(shotClockInterval);
-                    
-                    let opponentName = isRoomHost ? 
-                        document.getElementById('p2-name-input').value : 
-                        document.getElementById('p1-name-input').value;
-
-                    let myColor = isRoomHost ? colorP1 : colorP2;
-
-                    // Show the victory message you requested
-                    spawnTextFx("VICTORY!", 450, 225, myColor);
-                    updateTickerMessage(`${opponentName.toUpperCase()} HAS LEFT THE GAME`);
-                    
-                    // Optional: Return to menu after 5 seconds
-                    setTimeout(() => {
-                        document.getElementById('game-container').style.display = 'none';
-                        showOnlineMenu();
-                    }, 5000);
-                }
-            });
-            // ----------------------------------------------
+            listenForGameUpdates(room.id || currentRoomCode); // Start listening to Firebase!
+            // ───────────────────────────────────
             
             gameLoopId = requestAnimationFrame(gameLoop);
         }

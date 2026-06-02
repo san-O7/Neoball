@@ -1255,7 +1255,7 @@
     </div>
 
     <script>
-// Disable Right-Click context menu
+        // Disable Right-Click context menu
         document.addEventListener('contextmenu', event => event.preventDefault());
 
         // Block common developer keyboard shortcuts
@@ -1897,7 +1897,7 @@
             clearInterval(shotClockInterval); 
             if (matchEndCondition) return; 
             
-            timeLeft = 15.0; 
+            timeLeft = roomTimerDuration; 
             updateClockUI();
             
             shotClockInterval = setInterval(() => {
@@ -1943,6 +1943,13 @@
             firstBallHitThisTurn = null; 
             ballsPottedThisTurn = []; 
             cueBallScratched = false;
+
+            if (typeof isOnlineMode !== 'undefined' && isOnlineMode && isRoomHost) {
+                activeRoomRef.child('gameState').update({
+                    turn: nextPlayer,
+                    isballInHand: true
+                });
+            }
             
             applyActivePlayerUI(); 
             updateScoreboardDisplay(); 
@@ -2515,19 +2522,22 @@
 
             // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
             if (currentRoomCode) {
-                // Collect exactly where every ball is to snap the other player's screen into sync
-                let syncBalls = balls.map(b => ({
-                    num: b.num, x: b.x, y: b.y, active: b.active
-                }));
+                // FIX: Only the player whose turn it WAS is allowed to sync the results!
+                // This stops both players from overwriting each other.
+                if (isMyTurn) {
+                    let syncBalls = balls.map(b => ({
+                        num: b.num, x: b.x, y: b.y, active: b.active
+                    }));
 
-                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
-                    activePlayer: currentPlayer,
-                    isBallInHand: isBallInHand,
-                    tableIsOpen: tableIsOpen,
-                    groups: playerGroups,
-                    ballsPos: syncBalls,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
+                    db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
+                        activePlayer: currentPlayer,
+                        isBallInHand: isBallInHand,
+                        tableIsOpen: tableIsOpen,
+                        groups: playerGroups,
+                        ballsPos: syncBalls,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
 
                 // Determine if it is MY turn locally based on my Host/Guest status
                 if (isRoomHost) {
@@ -2536,7 +2546,6 @@
                     isMyTurn = (currentPlayer === 2);
                 }
             }
-            // ───────────────────────────────────────────────────────────────────
         }
 
         function applyActivePlayerUI() {
@@ -2925,6 +2934,7 @@
         (function() {
             const rail = document.getElementById('power-rail-box');
             rail.addEventListener('pointerdown', function(e) {
+                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
                 if (shotActive || matchEndCondition || isPaused) return;
                 initAudio();
                 inputState = 'charging';
@@ -2933,10 +2943,12 @@
                 e.stopPropagation();
             });
             rail.addEventListener('pointermove', function(e) {
+                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
                 if (inputState !== 'charging') return;
                 updatePowerFromY(e.clientY, this.getBoundingClientRect());
             });
             rail.addEventListener('pointerup', function(e) {
+                if (isOnlineMode && currentTurnPlayerId !== localPlayerId) return;
                 if (inputState !== 'charging') return;
                 if (currentPower > 5) { fireShot(); } else { resetPowerUI(); }
                 inputState = 'idle';
@@ -3480,6 +3492,9 @@
                 colorP1 = THEME_PRESETS[s.themeIdx].p1;
                 colorP2 = THEME_PRESETS[s.themeIdx].p2;
             }
+            if (s.shotClock !== undefined) {
+                     roomTimerDuration = s.shotClock; 
+            }
             preRenderCloth();
 
             // Set player name inputs so initLevel() picks them up
@@ -3502,8 +3517,45 @@
                 isMyTurn = false; // Guest waits
                 updateTickerMessage("WAITING FOR OPPONENT...");
             }
-            listenForGameUpdates(room.id || currentRoomCode); // Start listening to Firebase!
-            // ───────────────────────────────────
+            listenForGameUpdates(room.id || currentRoomCode); 
+            // ─── NEW: START MULTIPLAYER SYNC ───
+            if (isRoomHost) {
+                isMyTurn = true; 
+                updateTickerMessage("YOUR TURN! DRAG TO AIM.");
+            } else {
+                isMyTurn = false; 
+                updateTickerMessage("WAITING FOR OPPONENT...");
+            }
+            listenForGameUpdates(room.id || currentRoomCode); 
+            
+
+            db.ref('rooms/' + currentRoomCode).onDisconnect().remove();
+
+            // Listen to see if the room gets deleted (meaning the OPPONENT dropped)
+            db.ref('rooms/' + currentRoomCode).on('value', (snap) => {
+                if (!snap.exists() && !matchEndCondition) {
+                    // Room was deleted by the opponent leaving
+                    matchEndCondition = true; 
+                    if (typeof shotClockInterval !== 'undefined') clearInterval(shotClockInterval);
+                    
+                    let opponentName = isRoomHost ? 
+                        document.getElementById('p2-name-input').value : 
+                        document.getElementById('p1-name-input').value;
+
+                    let myColor = isRoomHost ? colorP1 : colorP2;
+
+                    // Show the victory message you requested
+                    spawnTextFx("VICTORY!", 450, 225, myColor);
+                    updateTickerMessage(`${opponentName.toUpperCase()} HAS LEFT THE GAME`);
+                    
+                    // Optional: Return to menu after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('game-container').style.display = 'none';
+                        showOnlineMenu();
+                    }, 5000);
+                }
+            });
+            // ----------------------------------------------
             
             gameLoopId = requestAnimationFrame(gameLoop);
         }

@@ -1525,12 +1525,14 @@
         let isBreakShot = true; 
         let firstBallHitThisTurn = null; 
         let ballsPottedThisTurn = [];
-        let cueBallScratched = false; 
+        let cueBallScratched = false;
+        let cueBall = null; 
         let isBallInHand = false; 
         let shotActive = false;
         let gameMatchStartTime = 0;
         let lastProcessedShotTime = 0;
         let matchEndCondition = false;
+        let isOnlineMode = false;
         let isPaused = false; 
         let gameLoopId = null; 
         let inputState = 'idle'; 
@@ -1861,7 +1863,7 @@
             document.getElementById('p1-tray').innerHTML = ''; 
             document.getElementById('p2-tray').innerHTML = '';
 
-            cueBall = new Ball(240, 225, 0); 
+            cueBall = new Ball(240, 225, 'white'); 
             balls.push(cueBall);
             
             const startX = 580; 
@@ -2705,7 +2707,6 @@
         function handleInputStart(e) {
             if (!cueBall) return;
             if (currentRoomCode && !isMyTurn) return;
-            if (shotActive) return;
             initAudio(); 
             if (shotActive || matchEndCondition || isPaused) return;
             

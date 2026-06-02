@@ -1525,7 +1525,9 @@
         let isBreakShot = true; 
         let firstBallHitThisTurn = null; 
         let ballsPottedThisTurn = [];
-        let cueBallScratched = false; 
+        let cueBallScratched = false;
+        let lastProcessedShotTime = 0;
+        let didIShootThisTurn = false; 
         let isBallInHand = false; 
         let shotActive = false;
         let gameMatchStartTime = 0;
@@ -2453,7 +2455,7 @@
                 railHitAfterContact = false;
                 return; 
             }
-            // ────────────────────────────────────────────────
+            didIShootThisTurn = false;
 
             let nextPlayer = currentPlayer === 1 ? 2 : 1; 
             let switchTurn = true; 
@@ -2837,6 +2839,9 @@
 
             shotActive = true; 
             clearInterval(shotClockInterval); 
+            if (!currentRoomCode || (currentRoomCode && isMyTurn)) {
+                didIShootThisTurn = true;
+            }
 
             // ─── MULTIPLAYER BROADCAST ─────────────────────────────
             if (currentRoomCode && isMyTurn) {
@@ -2895,7 +2900,7 @@
 
             // ... Keep your existing turnEnd listener down here ...
 
-           // 2. Listen for End-of-Turn sync data
+            // 2. Listen for End-of-Turn sync data
             // Inside listenForGameUpdates -> turnEnd listener:
             db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
                 const turnData = snap.val();

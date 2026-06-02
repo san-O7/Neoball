@@ -1902,7 +1902,7 @@
             updateClockUI();
             
             shotClockInterval = setInterval(() => {
-                if (!shotActive && !matchEndCondition && !isBallInHand && !isPaused) {
+                if (!shotActive && !matchEndCondition && !isPaused) {
                     timeLeft -= 0.1;
                     
                     if (timeLeft <= 0) { 
@@ -3492,7 +3492,7 @@
             if (activeRoomRef && activeRoomListener) {
                 activeRoomRef.off('value', activeRoomListener);
                 activeRoomListener = null;
-            }
+            }   
 
             // Apply room settings to the game engine
             const s = room.settings || {};
@@ -3526,7 +3526,9 @@
                 updateTickerMessage("WAITING FOR OPPONENT...");
             }
             listenForGameUpdates(room.id || currentRoomCode); // Start listening to Firebase!
-            // ───────────────────────────────────
+            if (typeof roomTimerSetting !== 'undefined' && roomTimerSetting > 0) {
+                startShotClock();
+            }
             
             gameLoopId = requestAnimationFrame(gameLoop);
         }

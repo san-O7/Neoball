@@ -1944,11 +1944,28 @@
             ballsPottedThisTurn = []; 
             cueBallScratched = false;
 
-            if (typeof isOnlineMode !== 'undefined' && isOnlineMode && isRoomHost) {
-                activeRoomRef.child('gameState').update({
-                    turn: nextPlayer,
-                    isballInHand: true
+            if (currentRoomCode && isMyTurn) {
+                let syncBalls = balls.map(b => ({
+                    num: b.num, x: b.x, y: b.y, active: b.active
+                }));
+
+                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
+                    activePlayer: currentPlayer, 
+                    isBallInHand: isBallInHand,   
+                    tableIsOpen: tableIsOpen,
+                    groups: playerGroups,
+                    ballsPos: syncBalls,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
+            }
+    
+            // Recalculate local turn permissions safely
+            if (currentRoomCode) {
+                if (isRoomHost) {
+                    isMyTurn = (currentPlayer === 1); 
+                } else {
+                    isMyTurn = (currentPlayer === 2);
+                }
             }
             
             applyActivePlayerUI(); 
@@ -2425,6 +2442,19 @@
         }
 
         function processTurnEnd() {
+            // ─── MULTIPLAYER RACE-CONDITION FIX (ISSUE 1) ───
+            // If we are playing online and it is NOT my turn, do NOT calculate turn logic locally.
+            // Exit early and wait for the shooter's Firebase update to handle it.
+            if (currentRoomCode && !isMyTurn) {
+                isBreakShot = false; 
+                firstBallHitThisTurn = null; 
+                ballsPottedThisTurn = []; 
+                cueBallScratched = false;
+                railHitAfterContact = false;
+                return; 
+            }
+            // ────────────────────────────────────────────────
+
             let nextPlayer = currentPlayer === 1 ? 2 : 1; 
             let switchTurn = true; 
             let msg = ""; 
@@ -2522,8 +2552,7 @@
 
             // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
             if (currentRoomCode) {
-                // FIX: Only the player whose turn it WAS is allowed to sync the results!
-                // This stops both players from overwriting each other.
+                // Only the player whose turn it WAS is allowed to sync the results!
                 if (isMyTurn) {
                     let syncBalls = balls.map(b => ({
                         num: b.num, x: b.x, y: b.y, active: b.active

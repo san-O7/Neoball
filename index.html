@@ -2895,13 +2895,14 @@
 
             // ... Keep your existing turnEnd listener down here ...
 
-            // 2. Listen for End-of-Turn sync data
+           // 2. Listen for End-of-Turn sync data
             // Inside listenForGameUpdates -> turnEnd listener:
             db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
                 const turnData = snap.val();
                 if (turnData) {
                     shotActive = false; 
 
+                    // ─── ABSOLUTE TURN AUTHORITY ───
                     currentPlayer = turnData.activePlayer;
                     isBallInHand = turnData.isBallInHand;
                     tableIsOpen = turnData.tableIsOpen;
@@ -2937,13 +2938,31 @@
                         });
                     }
 
+                    // Recalculate my turn permission based on the NEW currentPlayer
                     if (isRoomHost) {
                         isMyTurn = (currentPlayer === 1);
                     } else {
                         isMyTurn = (currentPlayer === 2);
                     }
 
+                    // ─── CRITICAL UPDATE FOR UI AND INPUTS ───
                     applyActivePlayerUI();
+                    updateScoreboardDisplay();
+                    
+                    // Reset the shot clock for the new turn
+                    startShotClock(); 
+
+                    // Update the on-screen ticker so the player knows what to do
+                    if (isMyTurn) {
+                        if (isBallInHand) {
+                            updateTickerMessage("BALL IN HAND: DRAG WHITE BALL TO PLACE");
+                        } else {
+                            updateTickerMessage("YOUR TURN! DRAG TO AIM.");
+                        }
+                    } else {
+                        updateTickerMessage(`${currentPlayer === 1 ? p1Name : p2Name}'S TURN`);
+                    }
+                     applyActivePlayerUI();
                     updateScoreboardDisplay();
                 }
             });

@@ -1896,25 +1896,34 @@
         function startShotClock() {
             clearInterval(shotClockInterval); 
             if (matchEndCondition) return; 
-    
-            timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0; 
             
+            // Grab your room setting, defaulting to 15.0 if undefined
+            timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0; 
             updateClockUI();
             
             shotClockInterval = setInterval(() => {
-                if (!shotActive && !matchEndCondition && !isPaused) {
+                
+            
+                if (shotActive) {
+                    clearInterval(shotClockInterval);
+                    timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0;
+                    updateClockUI();
+                    return;
+                }
+                // ───────────────────────────────────────────────
+
+                // Normal countdown logic
+                if (!matchEndCondition && !isPaused) {
                     timeLeft -= 0.1;
                     
                     if (timeLeft <= 0) { 
                         timeLeft = 0; 
                         clearInterval(shotClockInterval); 
                         
-                        // ─── MULTIPLAYER FIX ───
-                        // Only the player whose turn it currently is can declare a timeout foul!
+                        // Only the active player calls the foul
                         if (!currentRoomCode || (currentRoomCode && isMyTurn)) {
                             handleTimeoutFoul(); 
                         }
-                        // ───────────────────────
                     }
                     updateClockUI();
                 }
@@ -1954,6 +1963,22 @@
             
             applyActivePlayerUI(); 
             updateScoreboardDisplay(); 
+
+            // 👇 --- NEW MULTIPLAYER SYNC FIX --- 👇
+            if (typeof currentRoomCode !== 'undefined' && currentRoomCode) {
+                // 1. Physically lock the local controls for the player who timed out
+                isMyTurn = false; 
+                
+                // 2. Push the new turn and ball-in-hand status to Firebase 
+                // so Player 2's screen unlocks and they can drag the cue ball!
+                db.ref('rooms/' + currentRoomCode + '/gameState').update({
+                    currentPlayer: nextPlayer,
+                    isBallInHand: true,
+                    shotActive: false
+                }).catch(err => console.error("Firebase timeout sync failed:", err));
+            }
+            // 👆 -------------------------------- 👆
+
             startShotClock();
         }
 

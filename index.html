@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Neoball</title>
-
+ 
     <!-- OpenGraph / Social card meta -->
     <meta name="description" content="Neon 8-ball arcade billiards with a cyber aesthetic. Local and online two-player multiplayer, spin English, and shot-clock pressure.">
     <meta property="og:title" content="NEOBALL — Neon 8-Ball Arcade">
@@ -13,12 +13,12 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="NEOBALL — Neon 8-Ball Arcade">
     <meta name="twitter:description" content="Stylized neon billiards with spin English, power charging, and shot-clock pressure.">
-
+ 
     <!-- Cyber / neon display font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800;900&display=swap" rel="stylesheet">
-
+ 
     <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -57,7 +57,7 @@
             user-select: none;
         
         }
-
+ 
         /* Generic Menu Panel Styling */
         .menu-panel {
             position: absolute;
@@ -79,7 +79,7 @@
         .menu-panel > * {
             flex-shrink: 0;
         }
-
+ 
         /* Animated Background Grid for Menus */
         .menu-panel::before {
             content: "";
@@ -93,12 +93,12 @@
             z-index: -1;
             animation: grid-slide 15s linear infinite;
         }
-
+ 
         @keyframes grid-slide {
             0% { transform: translateY(0) rotate(15deg); }
             100% { transform: translateY(-30px) rotate(15deg); }
         }
-
+ 
         .glitch-title {
             font-size: 48px;
             font-weight: 900;
@@ -109,12 +109,12 @@
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.4), 0 0 30px rgba(56, 189, 248, 0.2);
             animation: neon-pulse 2.5s infinite alternate;
         }
-
+ 
         @keyframes neon-pulse {
             0% { text-shadow: 0 0 10px rgba(56, 189, 248, 0.3), 0 0 20px rgba(56, 189, 248, 0.3), 0 0 30px rgba(56, 189, 248, 0.2); }
             100% { text-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 0 40px rgba(56, 189, 248, 0.5), 0 0 60px rgba(56, 189, 248, 0.4); }
         }
-
+ 
         .subtitle {
             color: #38bdf8;
             font-size: 11px;
@@ -124,7 +124,7 @@
             text-transform: uppercase;
             opacity: 0.8;
         }
-
+ 
         .menu-panel h1.standard-title {
             font-size: 28px;
             font-weight: 900;
@@ -135,7 +135,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
+ 
         .matrix-label {
             font-weight: 800;
             letter-spacing: 3px;
@@ -145,7 +145,7 @@
             text-transform: uppercase;
             width: 100%;
         }
-
+ 
         .setting-row {
             width: 100%;
             display: flex;
@@ -158,7 +158,7 @@
             border: 1px solid #1e2445;
             box-sizing: border-box;
         }
-
+ 
         .setting-label {
             font-weight: 800;
             letter-spacing: 2px;
@@ -171,7 +171,7 @@
             width: 120px;
             background: transparent;
         }
-
+ 
         input[type=range]:focus { outline: none; }
         
         input[type=range]::-webkit-slider-thumb {
@@ -183,30 +183,30 @@
             margin-top: -6px;
             box-shadow: 0 0 10px #ffffff;
         }
-
+ 
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%; height: 4px;
             cursor: pointer;
             background: #1e2445;
             border-radius: 2px;
         }
-
+ 
         .toggle-btn {
             width: 120px;
             margin: 0;
             padding: 8px 0;
             font-size: 11px;
         }
-
+ 
         .toggle-btn.off {
             background: transparent;
             color: #f43f5e;
             border: 2px solid #f43f5e;
             box-shadow: none;
         }
-
+ 
         .toggle-btn.off:hover { background: rgba(244, 63, 94, 0.1); }
-
+ 
         .name-inputs {
             display: flex;
             gap: 15px;
@@ -214,7 +214,7 @@
             margin-bottom: 25px;
             box-sizing: border-box;
         }
-
+ 
         .name-input {
             flex: 1; min-width: 0; 
             background: rgba(0,0,0,0.5); border: 2px solid #1e2445;
@@ -223,7 +223,7 @@
             letter-spacing: 2px; font-size: 12px; outline: none; box-sizing: border-box;
             transition: all 0.2s ease;
         }
-
+ 
         .name-input:focus { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.3); }
         .name-input::placeholder { color: #475569; }
         
@@ -235,24 +235,24 @@
             overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
-
+ 
         #theme-matrix-grid::-webkit-scrollbar { width: 6px; }
         #theme-matrix-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
         #theme-matrix-grid::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
+ 
         .theme-select-card {
             background: #090a15; border: 2px solid #1e2445; color: #94a3b8;
             padding: 12px 10px; font-size: 11px; font-weight: 900;
             letter-spacing: 1px; border-radius: 10px; cursor: pointer;
             transition: all 0.2s ease; display: flex; align-items: center; justify-content: space-between;
         }
-
+ 
         .theme-select-card:hover { border-color: #475569; transform: translateY(-1px); }
         .theme-select-card.active {
             background: rgba(255, 255, 255, 0.03); color: #ffffff;
             border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
-
+ 
         .color-preview-dots { display: flex; gap: 6px; }
         .preview-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 6px currentColor; }
         
@@ -262,23 +262,23 @@
             cursor: pointer; transition: all 0.2s ease; width: 100%; margin-bottom: 12px;
             position: relative; overflow: hidden;
         }
-
+ 
         .sys-btn:hover { background: #e2e8f0; transform: scale(1.02); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
         .sys-btn.secondary { background: transparent; color: #cbd5e1; border: 2px solid #475569; }
         .sys-btn.secondary:hover { background: #1e2445; border-color: #cbd5e1; box-shadow: 0 0 15px rgba(203, 213, 225, 0.2); }
         .sys-btn.disabled { background: rgba(30, 36, 69, 0.4); border: 2px solid #1e2445; color: #475569; cursor: not-allowed; transform: none; box-shadow: none; }
-
+ 
         /* ── ONLINE ROOM SYSTEM ─────────────────────────────── */
         .online-subtitle {
             color: #38bdf8; font-size: 11px; letter-spacing: 4px;
             font-weight: 800; margin-bottom: 30px; text-transform: uppercase; opacity: 0.8;
         }
-
+ 
         .room-code-row {
             display: flex; gap: 10px; align-items: center;
             width: 100%; margin-bottom: 8px;
         }
-
+ 
         .room-code-display {
             flex: 1;
             background: rgba(56, 189, 248, 0.08); border: 2px solid #38bdf8;
@@ -286,37 +286,37 @@
             font-size: 22px; font-weight: 900; letter-spacing: 8px;
             text-align: center; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
-
+ 
         .room-code-hint {
             font-size: 10px; letter-spacing: 2px; color: #475569;
             font-weight: 700; width: 100%; text-align: left;
             margin-bottom: 8px; text-transform: uppercase;
         }
-
+ 
         .room-code-big {
             font-size: 52px; font-weight: 900; letter-spacing: 16px;
             color: #ffffff; margin: 20px 0 6px; text-align: center;
             animation: code-pulse 2s infinite alternate;
             word-break: break-all;
         }
-
+ 
         @keyframes code-pulse {
             0% { text-shadow: 0 0 15px rgba(56, 189, 248, 0.4), 0 0 30px rgba(56, 189, 248, 0.2); }
             100% { text-shadow: 0 0 25px rgba(56, 189, 248, 0.9), 0 0 50px rgba(56, 189, 248, 0.5), 0 0 80px rgba(56, 189, 248, 0.3); }
         }
-
+ 
         .waiting-pulse-ring {
             width: 60px; height: 60px; border-radius: 50%;
             border: 2px solid rgba(56, 189, 248, 0.5);
             animation: waiting-ripple 1.8s ease-out infinite;
             margin: 0 auto;
         }
-
+ 
         @keyframes waiting-ripple {
             0% { transform: scale(0.8); opacity: 1; }
             100% { transform: scale(2.2); opacity: 0; }
         }
-
+ 
         #create-room-screen { 
             max-height: 90vh; 
             overflow-y: auto; 
@@ -336,12 +336,12 @@
         #create-room-screen::-webkit-scrollbar-thumb:hover {
             background: #ffffff; 
         }
-
+ 
         .join-code-input {
             font-size: 28px !important; letter-spacing: 10px !important;
             padding: 20px !important; text-align: center;
         }
-
+ 
         #room-theme-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
             margin-bottom: 20px; 
@@ -350,10 +350,10 @@
             overflow-y: auto;
             padding-right: 8px; width: 100%; box-sizing: border-box;
         }
-
+ 
         #room-theme-grid::-webkit-scrollbar { width: 6px; }
         #room-theme-grid::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
+ 
         .btn-regen {
             background: transparent; border: 2px solid #38bdf8; color: #38bdf8;
             padding: 12px 16px; border-radius: 12px; font-family: inherit;
@@ -361,11 +361,11 @@
             flex-shrink: 0; line-height: 1;
         }
         .btn-regen:hover { background: rgba(56,189,248,0.1); box-shadow: 0 0 10px rgba(56,189,248,0.3); }
-
+ 
         #join-error-msg { color: #f43f5e; font-size: 11px; letter-spacing: 2px; font-weight: 800; min-height: 18px; margin-bottom: 12px; }
-
+ 
         #waiting-status-msg { color: #38bdf8; font-size: 12px; letter-spacing: 3px; font-weight: 800; margin-top: 20px; margin-bottom: 30px; text-transform: uppercase; }
-
+ 
         /* Cinematic Full-Screen End Overlay */
         #end-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -373,30 +373,30 @@
             flex-direction: column; align-items: center; justify-content: center;
             text-align: center; opacity: 0; transition: opacity 0.4s ease; will-change: opacity;
         }
-
+ 
         .victory-title {
             font-size: 80px; font-weight: 900; letter-spacing: 24px; margin: 0; margin-right: -24px; 
             text-transform: uppercase; opacity: 0; transform: translate3d(0, -80px, 0) scale(0.8); will-change: transform, opacity;
         }
-
+ 
         .victory-desc {
             font-size: 16px; letter-spacing: 8px; font-weight: 700; color: #94a3b8;
             margin-top: 25px; margin-bottom: 60px; opacity: 0; transform: translate3d(0, 20px, 0); will-change: transform, opacity;
         }
-
+ 
         .end-btn-group {
             display: flex; gap: 20px; opacity: 0; transform: translate3d(0, 20px, 0);
             width: 400px; flex-direction: column; will-change: transform, opacity;
         }
-
+ 
         #end-screen.active-anim { opacity: 1; }
         #end-screen.active-anim .victory-title { animation: slam-down 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         #end-screen.active-anim .victory-desc { animation: fade-up 0.5s ease 0.3s forwards; }
         #end-screen.active-anim .end-btn-group { animation: fade-up 0.5s ease 0.4s forwards; }
-
+ 
         @keyframes slam-down { to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
         @keyframes fade-up { to { opacity: 1; transform: translate3d(0, 0, 0); } }
-
+ 
         #sys-pause-btn {
             background: rgba(5, 6, 18, 0.8);
             border: 2px solid #1e2445; 
@@ -412,13 +412,13 @@
             margin: 0; /* <-- Changed this to 0 */
             font-size: 11px;
         }
-
+ 
         #sys-pause-btn:hover { 
             border-color: #38bdf8; 
             color: #38bdf8; 
             box-shadow: 0 0 10px rgba(56,189,248,0.2); 
         }
-
+ 
         #game-container {
             display: none; 
             flex-direction: column; 
@@ -430,7 +430,7 @@
             box-sizing: border-box;
             touch-action: none; 
         }
-
+ 
        #scoreboard { 
             display: flex; 
             justify-content: space-between; 
@@ -445,7 +445,7 @@
             flex-shrink: 0; 
             box-sizing: border-box;
         }
-
+ 
         #middle-ui { 
             text-align: center; 
             min-width: 280px; 
@@ -454,7 +454,7 @@
             flex-direction: column;
             justify-content: space-evenly; /* Spreads title, clock, and ticker evenly */
         }
-
+ 
         #status-ticker {
             height: 20px;
             line-height: 20px;
@@ -464,12 +464,12 @@
             align-items: center;
             justify-content: center;
         }
-
+ 
         .player-card {
             background: rgba(6, 8, 20, 0.8); border: 2px solid #161a36; padding: 14px 24px;
             border-radius: 16px; min-width: 220px; text-align: center; transition: all 0.3s ease;
         }
-
+ 
         .player-name { font-size: 15px; letter-spacing: 3px; font-weight: 900; color: #475569; margin-bottom: 4px; transition: color 0.3s ease; }
         .group-status { font-size: 11px; letter-spacing: 1px; font-weight: 700; color: #64748b; text-transform: uppercase; }
         
@@ -479,17 +479,17 @@
             position: relative; overflow: hidden; margin: 0 3px; opacity: 1; transform: scale(1);
             transition: width 0.4s ease, margin 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, background 0.3s ease;
         }
-
+ 
         .hud-ball.sunk { width: 0px; margin: 0 0px; opacity: 0; transform: scale(0); }
         .hud-stripe-band { position: absolute; top: 25%; width: 100%; height: 50%; transition: background 0.3s ease; }
-
+ 
         #game-title {
             font-size: 28px; letter-spacing: 10px; font-weight: 900; margin: 0;
             background: linear-gradient(180deg, #ffffff 0%, #64748b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
+ 
         #countdown-clock { font-size: 15px; font-weight: 900; letter-spacing: 4px; margin-top: 5px; font-family: monospace; transition: all 0.2s ease; }
-
+ 
         #arena-floor { display: flex; gap: 24px; width: 100%; align-items: center; }
         #canvas-wrapper { flex: 1; position: relative; cursor: crosshair; }
         
@@ -497,7 +497,7 @@
             background-color: #04050d; border: 4px solid #1e2445; border-radius: 20px;
             box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8); width: 100%; height: auto; aspect-ratio: 900 / 450; display: block;
         }
-
+ 
         /* --- CONTROL DECK ALIGNMENT AND UI --- */
         #control-deck {
             width: 140px; 
@@ -520,14 +520,14 @@
             height: fit-content; 
             align-self: center;
         }
-
+ 
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
         }
-
+ 
         .deck-label { 
             font-size: 11px; 
             font-weight: 800; 
@@ -549,24 +549,24 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(56, 189, 248, 0.3);
             transition: all 0.2s ease;
         }
-
+ 
         #spin-widget:hover {
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 20px rgba(56, 189, 248, 0.5);
             border-color: #ffffff;
         }
-
+ 
         #spin-widget:active { transform: scale(0.98); }
-
+ 
         #spin-crosshair {
             position: absolute; top: 50%; left: 5%; width: 90%; height: 1px;
             background-color: rgba(56, 189, 248, 0.3); transform: translateY(-50%);
         }
-
+ 
         #spin-crosshair-y {
             position: absolute; left: 50%; top: 5%; height: 90%; width: 1px;
             background-color: rgba(56, 189, 248, 0.3); transform: translateX(-50%);
         }
-
+ 
         #spin-reticle {
             width: 16px; height: 16px; border-radius: 50%;
             background: transparent; border: 2px solid #f43f5e;
@@ -574,14 +574,14 @@
             transform: translate(-50%, -50%);
             pointer-events: none; box-shadow: 0 0 8px #f43f5e;
         }
-
+ 
         #power-rail-box { 
             position: relative; width: 36px; height: 200px; 
             background: #0b0d1a; border: 2px solid #1e2445; 
             border-radius: 18px; cursor: pointer;
             touch-action: none;
         }
-
+ 
         /* Transparent hit-zone halo — catches taps/clicks that land near but not on the thin rail */
         #power-rail-box::before {
             content: '';
@@ -589,21 +589,21 @@
             top: -20px; bottom: -20px;
             left: -32px; right: -32px;
         }
-
+ 
         #power-glow-fill { 
             position: absolute; top: 0; left: 0; width: 100%; height: 0%; 
             border-radius: 16px; pointer-events: none; z-index: 1;
         }
-
+ 
         #power-handle {
             position: absolute; top: 0%; left: -8px; width: 52px; height: 20px; background: #ffffff;
             border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.8); 
             transform: translateY(-50%); pointer-events: none; transition: box-shadow 0.3s ease;
             z-index: 2;
         }
-
+ 
         #spin-widget { touch-action: none; }
-
+ 
         /* Game Layout Elements */
         #game-container {
             display: none; 
@@ -614,7 +614,7 @@
             padding: 15px; 
             box-sizing: border-box;
         }
-
+ 
         #scoreboard { 
             display: flex; 
             justify-content: space-between; 
@@ -625,13 +625,13 @@
             gap: 10px;
             flex-shrink: 0; /* Prevents scoreboard from squishing */
         }
-
+ 
         .player-card {
             background: rgba(6, 8, 20, 0.8); border: 2px solid #161a36; padding: 10px 15px;
             border-radius: 16px; min-width: 180px; text-align: center; transition: all 0.3s ease;
             flex: 1;
         }
-
+ 
         .player-name { font-size: 16px; letter-spacing: 3px; font-weight: 900; color: #475569; margin-bottom: 4px; transition: color 0.3s ease; }
         .group-status { font-size: 11px; letter-spacing: 1px; font-weight: 700; color: #64748b; text-transform: uppercase; }
         
@@ -641,19 +641,19 @@
             position: relative; overflow: hidden; margin: 0 3px; opacity: 1; transform: scale(1);
             transition: width 0.4s ease, margin 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, background 0.3s ease;
         }
-
+ 
         .hud-ball.sunk { width: 0px; margin: 0 0px; opacity: 0; transform: scale(0); }
         .hud-stripe-band { position: absolute; top: 25%; width: 100%; height: 50%; transition: background 0.3s ease; }
-
+ 
         #middle-ui { text-align: center; min-width: 200px; flex: 1; }
         #game-title {
             font-size: 26px; letter-spacing: 8px; font-weight: 900; margin: 0;
             background: linear-gradient(180deg, #ffffff 0%, #64748b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
+ 
         #countdown-clock { font-size: 16px; font-weight: 900; letter-spacing: 4px; margin-top: 5px; font-family: monospace; transition: all 0.2s ease; }
         #status-ticker { font-size: 11px; letter-spacing: 2px; color: #38bdf8; margin-top: 6px; font-weight: 800; }
-
+ 
         /* Arena Floor & Canvas Container */
         #arena-floor { 
             display: flex; 
@@ -687,7 +687,7 @@
             object-fit: contain; /* Automatically scales canvas to fit height/width without overflowing */
             display: block;
         }
-
+ 
         /* --- RESPONSIVE CONTROL DECK --- */
         #control-deck {
             width: 140px; 
@@ -708,14 +708,14 @@
                 linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
             background-size: 20px 20px;
         }
-
+ 
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
         }
-
+ 
         .deck-label { 
             font-size: 11px; 
             font-weight: 800; 
@@ -736,13 +736,13 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(56, 189, 248, 0.3);
             transition: all 0.2s ease;
         }
-
+ 
         #spin-widget:hover { border-color: #ffffff; }
         #spin-widget:active { transform: scale(0.98); }
-
+ 
         #spin-crosshair { position: absolute; top: 50%; left: 5%; width: 90%; height: 1px; background-color: rgba(56, 189, 248, 0.3); transform: translateY(-50%); pointer-events: none;}
         #spin-crosshair-y { position: absolute; left: 50%; top: 5%; height: 90%; width: 1px; background-color: rgba(56, 189, 248, 0.3); transform: translateX(-50%); pointer-events: none;}
-
+ 
         #spin-reticle {
             width: 14px; height: 14px; border-radius: 50%;
             background: transparent; border: 2px solid #f43f5e;
@@ -750,7 +750,7 @@
             transform: translate(-50%, -50%);
             pointer-events: none; box-shadow: 0 0 8px #f43f5e;
         }
-
+ 
         #power-rail-box { 
             position: relative; width: 32px; height: 180px; 
             background: #0b0d1a; border: 2px solid #1e2445; 
@@ -768,7 +768,7 @@
             border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.8); 
             transform: translateY(-50%); pointer-events: none; transition: box-shadow 0.3s ease;
         }
-
+ 
         /* ========================================= */
         /* --- MOBILE PORTRAIT MODE (VERTICAL) --- */
         /* ========================================= */
@@ -950,7 +950,7 @@
         pointer-events: none;
     }
 }
-
+ 
         /* ========================================= */
         /* --- MOBILE LANDSCAPE MODE (HORIZONTAL) --- */
         /* ========================================= */
@@ -1063,7 +1063,7 @@
                 border-radius: 14px;
             }
         }
-
+ 
         /* Universal Tiny Screen Support */
         @media (max-width: 600px) {
             #scoreboard {
@@ -1079,7 +1079,7 @@
     </style>
 </head>
 <body>
-
+ 
     <div id="main-menu" class="menu-panel">
         <div class="glitch-title">NEOBALL</div>
         <div class="subtitle">NEON 8-BALL ARCADE</div>
@@ -1087,7 +1087,7 @@
         <button id="btn-menu-online" class="sys-btn secondary">ONLINE PLAY</button>
         <button id="btn-menu-settings" class="sys-btn secondary">SETTINGS</button>
     </div>
-
+ 
     <div id="settings-menu" class="menu-panel" style="display: none;">
         <h1 class="standard-title">SYSTEM SETTINGS</h1>
         
@@ -1095,24 +1095,24 @@
             <div class="setting-label">AUDIO VOLUME</div>
             <input type="range" id="vol-slider" min="0" max="1" step="0.1" value="1">
         </div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">AIM ASSIST LASER</div>
             <button id="toggle-aim" class="sys-btn toggle-btn">ENABLED</button>
         </div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">ARENA CLOTH TINT</div>
             <button id="toggle-cloth" class="sys-btn toggle-btn" style="color: #cbd5e1; border-color: #cbd5e1;">DEEP SPACE</button>
         </div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">PARTICLES &amp; SHAKE</div>
             <button id="toggle-fx" class="sys-btn toggle-btn">ENABLED</button>
         </div>
         <button id="btn-settings-back" class="sys-btn secondary" style="margin-top: 15px;">BACK TO MENU</button>
     </div>
-
+ 
     <div id="setup-screen" class="menu-panel" style="display: none;">
         <h1 class="standard-title">GAME SETUP</h1>
         
@@ -1121,14 +1121,14 @@
             <input type="text" id="p1-name-input" class="name-input" placeholder="PLAYER 01" maxlength="12" autocomplete="off">
             <input type="text" id="p2-name-input" class="name-input" placeholder="PLAYER 02" maxlength="12" autocomplete="off">
         </div>
-
+ 
         <div class="matrix-label">SELECT COLOR THEME</div>
         <div id="theme-matrix-grid"></div>
-
+ 
         <button id="start-btn" class="sys-btn">START GAME</button>
         <button id="btn-setup-back" class="sys-btn secondary">BACK TO MENU</button>
     </div>
-
+ 
     <div id="pause-menu" class="menu-panel" style="display: none;">
         <h1 class="standard-title">PAUSED</h1>
         <p style="color: #94a3b8; font-size: 11px; line-height: 2; letter-spacing: 2px; font-weight: 700; margin-bottom: 25px;">ARROWS / A-D: AIM (SHIFT = FINE)<br>HOLD SPACE: CHARGE · RELEASE: SHOOT<br>P / ESC: PAUSE · M: MUTE</p>
@@ -1136,7 +1136,7 @@
         <button id="btn-pause-settings" class="sys-btn secondary">SETTINGS</button>
         <button id="btn-quit" class="sys-btn secondary">QUIT TO MENU</button>
     </div>
-
+ 
     <!-- ═══════════ ONLINE PLAY: MODE SELECTION ═══════════ -->
     <div id="online-menu" class="menu-panel" style="display: none;">
         <h1 class="standard-title">ONLINE PLAY</h1>
@@ -1145,11 +1145,11 @@
         <button id="btn-join-room" class="sys-btn secondary">JOIN ROOM</button>
         <button id="btn-online-back" class="sys-btn secondary">BACK TO MENU</button>
     </div>
-
+ 
     <!-- ═══════════ CREATE ROOM SCREEN ═══════════ -->
     <div id="create-room-screen" class="menu-panel" style="display: none;">
         <h1 class="standard-title">CREATE ROOM</h1>
-
+ 
         <div class="matrix-label">ROOM CODE</div>
         <div class="room-code-row">
             <div class="room-code-display" id="create-room-code">ABC123</div>
@@ -1157,51 +1157,51 @@
         </div>
         <div class="room-code-hint">Or type a custom code below</div>
         <input type="text" id="custom-code-input" class="name-input" placeholder="TYPE CUSTOM CODE" maxlength="6" autocomplete="off" style="margin-bottom: 20px; letter-spacing: 6px; text-align: center; text-transform: uppercase;">
-
+ 
         <div class="matrix-label">YOUR NAME</div>
         <input type="text" id="room-host-name" class="name-input" placeholder="PLAYER 01" maxlength="12" autocomplete="off" style="margin-bottom: 20px;">
-
+ 
         <div class="matrix-label">ROOM SETTINGS</div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">SHOT CLOCK</div>
             <button id="room-toggle-clock" class="sys-btn toggle-btn">15 SEC</button>
         </div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">AIM ASSIST</div>
             <button id="room-toggle-aim" class="sys-btn toggle-btn">ENABLED</button>
         </div>
-
+ 
         <div class="setting-row">
             <div class="setting-label">ARENA CLOTH</div>
             <button id="room-toggle-cloth" class="sys-btn toggle-btn" style="color:#cbd5e1; border-color:#cbd5e1;">DEEP SPACE</button>
         </div>
-
+ 
         <div class="matrix-label" style="margin-top: 10px;">COLOR THEME</div>
         <div id="room-theme-grid"></div>
-
+ 
         <button id="btn-launch-room" class="sys-btn" style="margin-top: 5px;">LAUNCH ROOM</button>
         <button id="btn-create-back" class="sys-btn secondary">BACK</button>
     </div>
-
+ 
     <!-- ═══════════ JOIN ROOM SCREEN ═══════════ -->
     <div id="join-room-screen" class="menu-panel" style="display: none;">
         <h1 class="standard-title">JOIN ROOM</h1>
         <p style="color:#94a3b8; font-size:11px; letter-spacing:3px; font-weight:800; margin-bottom:25px; text-transform:uppercase;">ENTER YOUR FRIEND'S CODE</p>
-
+ 
         <div class="matrix-label">YOUR NAME</div>
         <input type="text" id="join-guest-name" class="name-input" placeholder="PLAYER 02" maxlength="12" autocomplete="off" style="margin-bottom: 20px;">
-
+ 
         <div class="matrix-label">ROOM CODE</div>
         <input type="text" id="join-code-input" class="name-input join-code-input" placeholder="· · · · · ·" maxlength="6" autocomplete="off">
-
+ 
         <div id="join-error-msg"></div>
-
+ 
         <button id="btn-join-confirm" class="sys-btn">JOIN ROOM</button>
         <button id="btn-join-back" class="sys-btn secondary">BACK</button>
     </div>
-
+ 
     <!-- ═══════════ WAITING ROOM (after host creates) ═══════════ -->
     <div id="waiting-room-screen" class="menu-panel" style="display: none;">
         <h1 class="standard-title">ROOM READY</h1>
@@ -1211,7 +1211,7 @@
         <div id="waiting-status-msg">WAITING FOR OPPONENT...</div>
         <button id="btn-cancel-room" class="sys-btn secondary">CANCEL ROOM</button>
     </div>
-
+ 
     <div id="end-screen">
         <h1 id="end-title" class="victory-title">VICTORY</h1>
         <p id="end-desc" class="victory-desc">PLAYER 1 WINS THE GAME!</p>
@@ -1221,8 +1221,8 @@
             <button id="btn-end-menu" class="sys-btn secondary">MAIN MENU</button>
         </div>
     </div>
-
-
+ 
+ 
     <div id="game-container">
         <div id="scoreboard">
             <div id="card-p1" class="player-card">
@@ -1234,7 +1234,7 @@
                 <h1 id="game-title">NEOBALL</h1>
                 <div id="countdown-clock">T-MINUS: 15.0s</div>
                 <div id="status-ticker">GAME READY</div>
-
+ 
                 <div style="height: 28px; margin-top: 10px; display: flex; justify-content: center;">
                     <button id="sys-pause-btn">|| PAUSE</button>
                 </div>
@@ -1245,12 +1245,12 @@
                 <div id="p2-tray" class="tray"></div>
             </div>
         </div>
-
+ 
         <div id="arena-floor">
             <div id="canvas-wrapper">
                 <canvas id="gameCanvas" width="900" height="450"></canvas>
             </div>
-
+ 
             <div id="control-deck">
                 <div class="control-group">
                     <div class="deck-label">ENGLISH</div>
@@ -1270,7 +1270,7 @@
             </div>
         </div>
     </div>
-
+ 
     <script>
         // localStorage can throw (private mode / sandboxed iframes): fall back to memory
         const storage = (() => {
@@ -1279,10 +1279,10 @@
         })();
         // Suppress the context menu on the table only (long-press / right-click while aiming)
         document.getElementById('gameCanvas').addEventListener('contextmenu', e => e.preventDefault());
-
+ 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
+ 
         function setupCanvasScale() {
             const dpr = window.devicePixelRatio || 1;
             canvas.width = 900 * dpr;
@@ -1290,7 +1290,7 @@
             ctx.scale(dpr, dpr);
         }
         setupCanvasScale();
-
+ 
         let sfxVolume     = parseFloat(storage.getItem('nb_sfxVolume') ?? '1.0');
         let aimAssistEnabled = (storage.getItem('nb_aimAssist') ?? 'true') === 'true';
         let settingsReturnTarget = 'main';
@@ -1301,21 +1301,21 @@
         const clothColors = ['#0b0d1f', '#06170d', '#1a0909', '#140a1f'];
         const clothNames  = ['DEEP SPACE', 'RETRO GREEN', 'CRIMSON RED', 'VOID PURPLE'];
         let currentClothIdx = parseInt(storage.getItem('nb_clothIdx') ?? '0');
-
+ 
         const audioCtx = window.AudioContext || window.webkitAudioContext;
         let actx = null;
-
+ 
         function initAudio() {
             if (!actx) actx = new audioCtx();
             if (actx.state === 'suspended') actx.resume();
         }
-
+ 
         window.addEventListener('click', initAudio, { once: true });
         window.addEventListener('touchstart', initAudio, { once: true });
-
+ 
         let lastHitTime = 0;
         let lastCushionTime = 0;
-
+ 
         const sfx = {
             playLayered: function(layers, dur, xPos = null) {
                 if (!actx || sfxVolume <= 0) return;
@@ -1327,7 +1327,7 @@
                     panner.pan.value = Math.max(-1, Math.min(1, (xPos / 900) * 2 - 1));
                     panner.connect(actx.destination);
                 }
-
+ 
                 layers.forEach(l => {
                     let osc = actx.createOscillator();
                     let gain = actx.createGain();
@@ -1427,7 +1427,7 @@
                 });
             }
         };
-
+ 
         const THEME_PRESETS = [
             { name: "CYBER MATRIX", p1: "#38bdf8", p2: "#f43f5e" },
             { name: "PLASMA DRIVE", p1: "#fb923c", p2: "#a855f7" },
@@ -1460,11 +1460,11 @@
         let colorP2 = THEME_PRESETS[0].p2;
         let p1Name = "PLAYER 01"; 
         let p2Name = "PLAYER 02";
-
+ 
         const NEUTRAL_BASE = "#576574"; 
         const NEUTRAL_ACCENT = "#cbd5e1";
         let globalActiveColor = NEUTRAL_ACCENT; 
-
+ 
         function hexToRgb(hex) {
             let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
             hex = hex.replace(shorthandRegex, function(m, r, g, b) { 
@@ -1473,11 +1473,11 @@
             let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:0,g:0,b:0};
         }
-
+ 
         function rgbToHex(r, g, b) { 
             return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).padStart(6, '0'); 
         }
-
+ 
         function lerpColor(a, b, amount) {
             let c1 = hexToRgb(a); 
             let c2 = hexToRgb(b);
@@ -1486,7 +1486,7 @@
             let b2 = Math.round(c1.b + (c2.b - c1.b) * amount);
             return rgbToHex(r, g, b2);
         }
-
+ 
         const FRICTION = 0.98; 
         const RESTITUTION = 0.94; 
         const BALL_RADIUS = 13; 
@@ -1498,7 +1498,7 @@
         const CUSHION_D = 16; 
         const GAP_CORNER = 36; 
         const GAP_MID = 28;    
-
+ 
         const pockets = [
             { x: TABLE_LEFT, y: TABLE_TOP, r: 26, isCorner: true, ox: -4, oy: -4 }, 
             { x: 450, y: TABLE_TOP, r: 24, isCorner: false, ox: 0, oy: -6 }, 
@@ -1507,7 +1507,7 @@
             { x: 450, y: TABLE_BOTTOM, r: 24, isCorner: false, ox: 0, oy: 6 }, 
             { x: TABLE_RIGHT, y: TABLE_BOTTOM, r: 26, isCorner: true, ox: 4, oy: 4 }
         ];
-
+ 
         const knuckles = [
             {x: TABLE_LEFT + GAP_CORNER + CUSHION_D, y: TABLE_TOP + CUSHION_D, r: 6}, 
             {x: 450 - GAP_MID - 5, y: TABLE_TOP + CUSHION_D, r: 4}, 
@@ -1522,7 +1522,7 @@
             {x: TABLE_RIGHT - CUSHION_D, y: TABLE_TOP + GAP_CORNER + CUSHION_D, r: 6}, 
             {x: TABLE_RIGHT - CUSHION_D, y: TABLE_BOTTOM - GAP_CORNER - CUSHION_D, r: 6}
         ];
-
+ 
         let visualFx = []; 
         let clothTextureCanvas = null;
         let playerGroups = { 1: null, 2: null }; 
@@ -1552,15 +1552,15 @@
         const matchStats = { shots: [0, 0, 0], pots: [0, 0, 0], fouls: [0, 0, 0] };
         const keys = { left: false, right: false, fine: false }; 
         let shotClockInterval = null;
-
+ 
         let railHitAfterContact = false;
-
+ 
         let spinX = 0; 
         let spinY = 0; 
         let isDraggingSpin = false;
         const spinWidget = document.getElementById('spin-widget');
         const spinReticle = document.getElementById('spin-reticle');
-
+ 
         function updateSpin(e) {
             let rect = spinWidget.getBoundingClientRect();
             let cx = (e.clientX) - rect.left; 
@@ -1581,7 +1581,7 @@
             spinReticle.style.left = `${(nx + 1) / 2 * 100}%`;
             spinReticle.style.top = `${(ny + 1) / 2 * 100}%`;
         }
-
+ 
         spinWidget.addEventListener('pointerdown', e => {
             if (currentRoomCode && !isMyTurn) return;
             isDraggingSpin = true;
@@ -1592,7 +1592,7 @@
         const endSpinDrag = () => { isDraggingSpin = false; };
         spinWidget.addEventListener('pointerup', endSpinDrag);
         spinWidget.addEventListener('pointercancel', endSpinDrag);
-
+ 
         function preRenderCloth() {
             const dpr = window.devicePixelRatio || 1;
             clothTextureCanvas = document.createElement('canvas');
@@ -1620,7 +1620,7 @@
             tCtx.fillStyle = radialSheen; 
             tCtx.fillRect(0, 0, 900, 450);
         }
-
+ 
         class Ball {
             constructor(x, y, num) {
                 this.x = x; 
@@ -1638,26 +1638,26 @@
                 this.type = this.getType(); 
                 this.currentColor = this.getActiveColorMap(); 
                 this.angle = Math.random() * Math.PI * 2; 
-
+ 
                 this.activeSpin = false;
                 this.spinAngle = 0;
                 this.spinX = 0;
                 this.spinY = 0;
             }
-
+ 
             getType() { 
                 if (this.num === 0) return 'cue'; 
                 if (this.num === 8) return 'void'; 
                 return this.num < 8 ? 'solids' : 'stripes'; 
             }
-
+ 
             getActiveColorMap() {
                 if (tableIsOpen) return NEUTRAL_BASE;
                 if (this.type === 'solids') return playerGroups[1] === 'solids' ? colorP1 : colorP2;
                 if (this.type === 'stripes') return playerGroups[1] === 'stripes' ? colorP1 : colorP2;
                 return NEUTRAL_BASE;
             }
-
+ 
             draw(ctx) {
                 if (!this.active || this.x < -100) return; 
                 
@@ -1665,35 +1665,35 @@
                 if(this.type !== 'cue' && this.type !== 'void') {
                     this.currentColor = lerpColor(this.currentColor, targetColor, 1 - Math.pow(0.9, fxScale));
                 }
-
+ 
                 ctx.save();
                 
                 let currentR = this.radius * this.sinkScale;
                 let activeDrawColor = this.currentColor;
-
+ 
                 if (!this.isSinking) {
                     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
                     ctx.shadowBlur = 8;
                     ctx.shadowOffsetX = 3;
                     ctx.shadowOffsetY = 5;
                 }
-
+ 
                 ctx.translate(this.x, this.y);
-
+ 
                 ctx.beginPath();
                 ctx.arc(0, 0, currentR, 0, Math.PI * 2);
                 ctx.fillStyle = this.type === 'cue' ? '#f4f4f4' : (this.type === 'void' ? '#111111' : '#f4f4f4');
                 ctx.fill();
-
+ 
                 ctx.shadowColor = 'transparent';
-
+ 
                 ctx.save();
                 ctx.rotate(this.angle);
-
+ 
                 ctx.beginPath();
                 ctx.arc(0, 0, currentR, 0, Math.PI * 2);
                 ctx.clip();
-
+ 
                 if (this.type === 'solids') {
                     ctx.beginPath();
                     ctx.arc(0, 0, currentR, 0, Math.PI * 2);
@@ -1703,13 +1703,13 @@
                     ctx.fillStyle = activeDrawColor; 
                     ctx.fillRect(-currentR, -currentR * 0.45, currentR * 2, currentR * 0.9);
                 }
-
+ 
                 if (this.num > 0 && currentR > 4) {
                     ctx.beginPath();
                     ctx.arc(0, 0, currentR * (this.num === 8 ? 0.48 : 0.45), 0, Math.PI * 2);
                     ctx.fillStyle = this.num === 8 ? '#111111' : '#f4f4f4';
                     ctx.fill();
-
+ 
                     ctx.font = `900 ${currentR * 0.6}px 'Orbitron', 'Segoe UI', sans-serif`;
                     ctx.fillStyle = this.num === 8 ? '#f4f4f4' : '#04050d';
                     ctx.textAlign = 'center';
@@ -1723,9 +1723,9 @@
                     ctx.fillStyle = '#f43f5e';
                     ctx.fill();
                 }
-
+ 
                 ctx.restore();
-
+ 
                 if (currentR > 1) {
                     let volumeShadow = ctx.createRadialGradient(0, 0, currentR * 0.4, 0, 0, currentR);
                     volumeShadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
@@ -1736,19 +1736,19 @@
                     ctx.arc(0, 0, currentR, 0, Math.PI * 2);
                     ctx.fillStyle = volumeShadow;
                     ctx.fill();
-
+ 
                     let specX = -currentR * 0.35;
                     let specY = -currentR * 0.35;
                     let gloss = ctx.createRadialGradient(specX, specY, currentR * 0.05, specX, specY, currentR * 0.6);
                     gloss.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
                     gloss.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
                     gloss.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
+ 
                     ctx.beginPath();
                     ctx.arc(0, 0, currentR, 0, Math.PI * 2);
                     ctx.fillStyle = gloss;
                     ctx.fill();
-
+ 
                     let bounceX = currentR * 0.5;
                     let bounceY = currentR * 0.5;
                     let bounce = ctx.createRadialGradient(bounceX, bounceY, currentR * 0.1, bounceX, bounceY, currentR * 0.8);
@@ -1760,13 +1760,13 @@
                     ctx.fillStyle = bounce;
                     ctx.fill();
                 }
-
+ 
                 ctx.restore();
             }
-
+ 
             updatePos(steps) {
                 if (!this.active || (this.type === 'cue' && this.x === -999)) return;
-
+ 
                 if (this.isSinking) {
                     let sinkFriction = Math.pow(0.88, 1 / steps); 
                     this.vx *= sinkFriction; 
@@ -1779,10 +1779,10 @@
                     
                     this.x += (this.targetPx - this.x) * (0.15 / steps); 
                     this.y += (this.targetPy - this.y) * (0.15 / steps);
-
+ 
                     let speed = Math.hypot(dx, dy);
                     if (speed > 0.001) this.angle += speed / (this.radius * 0.8);
-
+ 
                     this.sinkScale -= (0.018 / steps);
                     
                     if (this.sinkScale <= 0.02) { 
@@ -1792,16 +1792,16 @@
                     }
                     return;
                 }
-
+ 
                 let dx = this.vx / steps; 
                 let dy = this.vy / steps;
                 this.x += dx; 
                 this.y += dy;
-
+ 
                 let stepFriction = Math.pow(FRICTION, 1 / steps);
                 this.vx *= stepFriction; 
                 this.vy *= stepFriction;
-
+ 
                 // BUG FIX: Massively scaled down the spin forces and increased the decay rate
                 // to prevent the cue ball from rocketing indefinitely.
                 if (this.type === 'cue' && this.activeSpin) {
@@ -1819,13 +1819,13 @@
                         
                         this.spinY *= Math.pow(0.92, 1/steps);
                         this.spinX *= Math.pow(0.95, 1/steps);
-
+ 
                         if (Math.abs(this.spinY) < 0.01 && Math.abs(this.spinX) < 0.01) {
                             this.activeSpin = false;
                         }
                     }
                 }
-
+ 
                 let speed = Math.hypot(dx, dy);
                 if (speed > 0.001) {
                     this.angle += speed / (this.radius * 0.8);
@@ -1834,7 +1834,7 @@
                     this.vy = 0; 
                 }
             }
-
+ 
             finalizePocketDrop() {
                 if (this.type === 'cue') {
                     cueBallScratched = true; 
@@ -1850,7 +1850,7 @@
                 }
             }
         }
-
+ 
         function initLevel() {
             balls = []; 
             playerGroups = { 1: null, 2: null }; 
@@ -1868,7 +1868,7 @@
             matchStats.shots = [0, 0, 0]; matchStats.pots = [0, 0, 0]; matchStats.fouls = [0, 0, 0];
             p1Name = document.getElementById('p1-name-input').value.trim().toUpperCase() || "PLAYER 01";
             p2Name = document.getElementById('p2-name-input').value.trim().toUpperCase() || "PLAYER 02";
-
+ 
             inputState = 'idle'; 
             aimAngle = 0; 
             resetPowerUI(); 
@@ -1879,7 +1879,7 @@
             
             document.getElementById('p1-tray').innerHTML = ''; 
             document.getElementById('p2-tray').innerHTML = '';
-
+ 
             cueBall = new Ball(240, 225, 0);   // num 0 = cue (was the string 'white', which made the cue ball a 'stripes' ball) 
             balls.push(cueBall);
             
@@ -1897,7 +1897,7 @@
                     balls.push(new Ball(bx, by, rackMap[mapIdx++]));
                 }
             }
-
+ 
             updateScoreboardDisplay(); 
             updateTickerMessage("BALL IN HAND: DRAG WHITE BALL");
             applyActivePlayerUI(); 
@@ -1905,13 +1905,13 @@
             
             document.getElementById('sys-pause-btn').style.display = 'block';
         }
-
+ 
         function resetPowerUI() {
             currentPower = 0; 
             document.getElementById('power-glow-fill').style.height = `0%`; 
             document.getElementById('power-handle').style.top = `0%`;
         }
-
+ 
         function startShotClock() {
             clearInterval(shotClockInterval); 
             if (matchEndCondition) return; 
@@ -1932,7 +1932,7 @@
                     timeLeft = roomTimerSetting; updateClockUI(); return;
                 }
                 // ───────────────────────────────────────────────
-
+ 
                 // Normal countdown logic
                 if (!matchEndCondition && !isPaused) {
                     timeLeft -= 0.1;
@@ -1950,7 +1950,7 @@
                 }
             }, 100);
         }
-
+ 
         // Pushes the authoritative turn state (used by turn end AND timeout fouls) so the opponent unlocks correctly
         function syncTurnState() {
             if (!currentRoomCode || !db) return;
@@ -1961,7 +1961,7 @@
                 ballsPos: ballsPos, timestamp: firebase.database.ServerValue.TIMESTAMP
             }).catch(err => console.error('Turn sync failed:', err));
         }
-
+ 
         function updateClockUI() {
             const clock = document.getElementById('countdown-clock'); 
             if (!clock) return;
@@ -1976,7 +1976,7 @@
                 clock.style.textShadow = 'none'; 
             }
         }
-
+ 
         function handleTimeoutFoul() {
             inputState = 'idle'; keyCharging = false; resetPowerUI(); matchStats.fouls[currentPlayer]++; let nextPlayer = currentPlayer === 1 ? 2 : 1;
             
@@ -1992,14 +1992,14 @@
             
             applyActivePlayerUI(); 
             updateScoreboardDisplay(); 
-
+ 
             // 👇 --- NEW MULTIPLAYER SYNC FIX --- 👇
             if (currentRoomCode) { isMyTurn = false; syncTurnState(); }
             // 👆 -------------------------------- 👆
-
+ 
             startShotClock();
         }
-
+ 
         function spawnTextFx(msg, x, y, color) { 
             visualFx.push({ type: 'text', msg, x, y, color, life: 1.0 }); 
         }
@@ -2016,7 +2016,7 @@
             }
         }
         function addShake(mag) { if (fxEnabled) shakeMag = Math.max(shakeMag, Math.min(6, mag)); }
-
+ 
         function renderFx(ctx) {
             for (let i = visualFx.length - 1; i >= 0; i--) {
                 let fx = visualFx[i];
@@ -2043,7 +2043,7 @@
                 if (fx.life <= 0) visualFx.splice(i, 1);
             }
         }
-
+ 
         function formatMatchStats() {
             const f = i => `${i === 1 ? p1Name : p2Name}: ${matchStats.shots[i]} SHOTS · ${matchStats.pots[i]} POTS · ${matchStats.fouls[i]} FOULS`;
             let out = f(1) + '\n' + f(2);
@@ -2054,7 +2054,7 @@
             }
             return out;
         }
-
+ 
         function showEndScreen(title, desc, color = "#ffffff") { if (matchEndCondition) return; matchEndCondition = true; isGameRunning = false; keyCharging = false; 
             clearInterval(shotClockInterval);
             
@@ -2078,7 +2078,7 @@
             
             document.getElementById('sys-pause-btn').style.display = 'none';
         }
-
+ 
         function evaluateVoidBallRules() {
             eightBallPotted = false;
             let oppName = currentPlayer === 1 ? p2Name : p1Name; 
@@ -2106,7 +2106,7 @@
                 }
             }
         }
-
+ 
         function resolveCollisions() {
             for (let i = 0; i < balls.length; i++) {
                 if (!balls[i].active || balls[i].isSinking || (balls[i].type === 'cue' && balls[i].x === -999)) continue;
@@ -2151,7 +2151,7 @@
                             let relTanVel = kx * tangentX + ky * tangentY;
                             let throwFriction = 0.08; 
                             let jTan = throwFriction * relTanVel / (b1.mass + b2.mass);
-
+ 
                             b1.vx -= (impulse * b2.mass * nx) + (jTan * b2.mass * tangentX); 
                             b1.vy -= (impulse * b2.mass * ny) + (jTan * b2.mass * tangentY); 
                             b2.vx += (impulse * b1.mass * nx) + (jTan * b1.mass * tangentX); 
@@ -2161,7 +2161,7 @@
                 }
             }
         }
-
+ 
         function resolveCushionsAndPockets() {
             for (let b of balls) {
                 if (!b.active || (b.type === 'cue' && b.x === -999)) continue;
@@ -2224,7 +2224,7 @@
                         let valTB = (b.x > TABLE_LEFT + GAP_CORNER + CUSHION_D && b.x < 450 - GAP_MID - 5) || 
                                     (b.x > 450 + GAP_MID + 5 && b.x < TABLE_RIGHT - GAP_CORNER - CUSHION_D);
                         let valLR = (b.y > TABLE_TOP + GAP_CORNER + CUSHION_D && b.y < TABLE_BOTTOM - GAP_CORNER - CUSHION_D);
-
+ 
                         if (b.y - b.radius < bT && valTB && b.vy < 0) { 
                             sfx.cushion(Math.abs(b.vy), b.x); 
                             b.y = bT + b.radius; 
@@ -2283,14 +2283,14 @@
                         b.vy = -Math.abs(b.vy) * RESTITUTION; 
                         bouncedThisStep = true;
                     }
-
+ 
                     if (bouncedThisStep && firstBallHitThisTurn !== null) {
                         railHitAfterContact = true;
                     }
                 }
             }
         }
-
+ 
         function calculateAimTrajectory() {
             let moving = balls.some(b => b.active && (b.isSinking || Math.abs(b.vx) > 0.05 || Math.abs(b.vy) > 0.05));
             if (moving || matchEndCondition || shotActive || (isBallInHand && inputState === 'dragging_ball') || isPaused || !aimAssistEnabled) return null;
@@ -2299,7 +2299,7 @@
             let dirY = Math.sin(aimAngle); 
             let closestT = Infinity; 
             let closestBall = null;
-
+ 
             for (let b of balls) {
                 if (!b.active || b.isSinking || b.type === 'cue') continue;
                 
@@ -2322,7 +2322,7 @@
                     } 
                 }
             }
-
+ 
             if (closestBall && closestT < 2000) {
                 let gx = cueBall.x + dirX * closestT; 
                 let gy = cueBall.y + dirY * closestT;
@@ -2346,7 +2346,7 @@
                 return { hit: false, end: { x: cueBall.x + dirX * wt, y: cueBall.y + dirY * wt } };
             }
         }
-
+ 
         function drawCleanTable() {
             ctx.drawImage(clothTextureCanvas, 0, 0, 900, 450);
             
@@ -2358,7 +2358,7 @@
             ctx.letterSpacing = '18px'; 
             ctx.fillText('NEOBALL', 457, 225); 
             ctx.restore();
-
+ 
             for (let p of pockets) {
                 let vx = p.x + p.ox; 
                 let py = p.y + p.oy;
@@ -2378,7 +2378,7 @@
                 ctx.fillStyle = grad; 
                 ctx.fill();
             }
-
+ 
             ctx.fillStyle = '#0f1124'; 
             ctx.strokeStyle = globalActiveColor; 
             ctx.lineWidth = 2; 
@@ -2401,12 +2401,12 @@
             ctx.beginPath(); ctx.moveTo(tl, tt + gc); ctx.lineTo(tl, tb - gc); ctx.lineTo(tl + d, tb - gc - d); ctx.lineTo(tl + d, tt + gc + d); ctx.closePath(); ctx.fill(); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(tr, tt + gc); ctx.lineTo(tr, tb - gc); ctx.lineTo(tr - d, tb - gc - d); ctx.lineTo(tr - d, tt + gc + d); ctx.closePath(); ctx.fill(); ctx.stroke();
         }
-
+ 
         function getActivePlayerColor() { 
             if (tableIsOpen) return NEUTRAL_ACCENT; 
             return currentPlayer === 1 ? colorP1 : colorP2; 
         }
-
+ 
         function drawAimSystem(traj) {
             if (!traj || shotActive || isPaused) return;
             
@@ -2419,7 +2419,7 @@
             ctx.lineWidth = 2.5; 
             ctx.stroke(); 
             ctx.restore();
-
+ 
             if (traj.hit) {
                 ctx.save(); 
                 ctx.beginPath(); 
@@ -2436,7 +2436,7 @@
                 ctx.globalAlpha = 0.8; 
                 ctx.lineWidth = 2; 
                 ctx.stroke(); 
-
+ 
                 // MINI PROJECTION FOR WHITE BALL
                 ctx.beginPath();
                 ctx.moveTo(traj.end.x, traj.end.y);
@@ -2446,11 +2446,11 @@
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([4, 4]); // Dashed style to distinguish from object ball
                 ctx.stroke();
-
+ 
                 ctx.restore();
             }
         }
-
+ 
         function drawCueStick() {
             let moving = balls.some(b => b.active && (b.isSinking || Math.abs(b.vx) > 0.05 || Math.abs(b.vy) > 0.05));
             if (shotActive || matchEndCondition || moving || (isBallInHand && inputState === 'dragging_ball') || isPaused) return;
@@ -2487,7 +2487,7 @@
             ctx.fillRect(-pullBack, -cueThickness, 4, cueThickness * 2);
             ctx.restore();
         }
-
+ 
         function processTurnEnd() {
             let nextPlayer = currentPlayer === 1 ? 2 : 1; 
             let switchTurn = true; 
@@ -2536,7 +2536,7 @@
                 msg = "FOUL: NO RAIL CONTACT AFTER HIT";
                 isBallInHand = true;
             }
-
+ 
             if (isBallInHand) {
                 matchStats.fouls[currentPlayer]++; if (!cueBallScratched) sfx.foul(); 
                 spawnTextFx("FOUL!", 450, 225, "#f43f5e"); 
@@ -2586,11 +2586,11 @@
             } else if (!matchEndCondition) {
                 updateTickerMessage("DRAG TO AIM. PULL SLIDER TO SHOOT.");
             }
-
+ 
             // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
             if (currentRoomCode) {
                 syncTurnState();
-
+ 
                 // Determine if it is MY turn locally based on my Host/Guest status
                 if (isRoomHost) {
                     isMyTurn = (currentPlayer === 1); 
@@ -2600,7 +2600,7 @@
             }
             // ───────────────────────────────────────────────────────────────────
         }
-
+ 
         function applyActivePlayerUI() {
             let card1 = document.getElementById('card-p1'); 
             let card2 = document.getElementById('card-p2');
@@ -2639,7 +2639,7 @@
                 document.getElementById('name-p2').style.color = p2C; 
             }
         }
-
+ 
         function updateTray(trayId, remainingCount, hexColor, isStripe, isNeutral) {
             let trayElement = document.getElementById(trayId);
             
@@ -2680,7 +2680,7 @@
                 nodes[7].classList.remove('sunk');
             }
         }
-
+ 
         function updateScoreboardDisplay() {
             let sCount = balls.filter(b => b.active && b.type === 'solids').length; 
             let mCount = balls.filter(b => b.active && b.type === 'stripes').length;
@@ -2704,11 +2704,11 @@
                 updateTray('p2-tray', p2Type === 'solids' ? sCount : mCount, p2Color, p2Type === 'stripes', false);
             }
         }
-
+ 
         function updateTickerMessage(msg) { 
             document.getElementById('status-ticker').innerText = msg.toUpperCase(); 
         }
-
+ 
         function parseCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
             let cx = e.clientX; 
@@ -2718,7 +2718,7 @@
                 y: (cy - rect.top) * (450 / rect.height) 
             };
         }
-
+ 
         function updatePowerFromY(clientY, rect) {
             let relativeY = clientY - rect.top; 
             
@@ -2727,10 +2727,10 @@
             document.getElementById('power-glow-fill').style.height = `${currentPower}%`; 
             document.getElementById('power-handle').style.top = `${currentPower}%`;
         }
-
+ 
         let previousTouchX = null;
         let previousTouchY = null;
-
+ 
         function handleInputStart(e) {
             if (!cueBall || !isGameRunning) return;
             if (e.target.closest && e.target.closest('.menu-panel, #end-screen, #sys-pause-btn')) return;
@@ -2745,7 +2745,7 @@
                 previousTouchX = e.clientX;
                 previousTouchY = e.clientY;
             }
-
+ 
             let cx = e.clientX; 
             let cy = e.clientY;
             
@@ -2772,7 +2772,7 @@
                 }
             }
         }
-
+ 
         function handleInputMove(e) {
             if (activePointerId !== null && e.pointerId !== activePointerId) return;
             if (currentRoomCode && !isMyTurn) return;
@@ -2825,7 +2825,7 @@
                 }
             }
         }
-
+ 
         function handleInputEnd(e) {
             if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
             activePointerId = null;
@@ -2844,12 +2844,12 @@
             } else if (inputState === 'aiming') { 
                 inputState = 'idle'; 
             }
-
+ 
             // Reset touch tracking when finger is lifted
             previousTouchX = null;
             previousTouchY = null;
         }
-
+ 
         function fireShot() {
             isBallInHand = false; matchStats.shots[currentPlayer]++; 
             let impulse = (currentPower / 100) * 28; 
@@ -2863,10 +2863,10 @@
             cueBall.spinX = spinX;
             cueBall.spinY = spinY;
             cueBall.activeSpin = true;
-
+ 
             shotActive = true; 
             clearInterval(shotClockInterval); 
-
+ 
             // ─── MULTIPLAYER BROADCAST ─────────────────────────────
             if (currentRoomCode && isMyTurn) {
                 db.ref('rooms/' + currentRoomCode + '/gameState/lastShot').set({
@@ -2883,15 +2883,15 @@
                 
                 isMyTurn = false; 
             }
-
-
+ 
+ 
             // ───────────────────────────────────────────────────────
-
+ 
             resetPowerUI(); 
             spawnRippleFx(cueBall.x, cueBall.y, globalActiveColor); 
             updateTickerMessage("SHOT FIRED!");
         }
-
+ 
         function listenForGameUpdates(code) {
             trackOn(db.ref('rooms/' + code + '/gameState/lastShot'), (snap) => {
                 const shotData = snap.val();
@@ -2921,20 +2921,20 @@
                     fireShot();
                 }
             });
-
+ 
             // ... Keep your existing turnEnd listener down here ...
-
+ 
             // 2. Listen for End-of-Turn sync data
             // Inside listenForGameUpdates -> turnEnd listener:
             trackOn(db.ref('rooms/' + code + '/gameState/turnEnd'), (snap) => {
                 const turnData = snap.val();
                 if (turnData) {
                     shotActive = false; 
-
+ 
                     currentPlayer = turnData.activePlayer;
                     isBallInHand = turnData.isBallInHand;
                     tableIsOpen = turnData.tableIsOpen;
-
+ 
                     // 🧼 SAFE PARSING: Prevent Firebase from altering your color data types
                     if (turnData.groups) {
                         playerGroups[1] = turnData.groups[1] || turnData.groups["1"] || null;
@@ -2942,14 +2942,14 @@
                     } else {
                         playerGroups = { 1: null, 2: null };
                     }
-
+ 
                     // Flush out local collision flags completely
                     firstBallHitThisTurn = null; 
                     ballsPottedThisTurn = []; 
                     cueBallScratched = false;
                     railHitAfterContact = false;
                     isBreakShot = false;
-
+ 
                     // Snap positions and kill remaining velocities
                     if (turnData.ballsPos) {
                         turnData.ballsPos.forEach(remoteBall => {
@@ -2965,13 +2965,13 @@
                             }
                         });
                     }
-
+ 
                     if (isRoomHost) {
                         isMyTurn = (currentPlayer === 1);
                     } else {
                         isMyTurn = (currentPlayer === 2);
                     }
-
+ 
                     applyActivePlayerUI();
                     updateScoreboardDisplay();
                     updateTickerMessage(isMyTurn ? (isBallInHand ? 'BALL IN HAND: DRAG WHITE BALL' : 'YOUR TURN! DRAG TO AIM.') : 'OPPONENT IS SHOOTING...');
@@ -2979,14 +2979,14 @@
                 }
             });
         }
-
+ 
         // ---------- INPUT: unified Pointer Events (no more double-firing touch + synthesized mouse) ----------
         window.addEventListener('pointerdown', handleInputStart);
         window.addEventListener('pointermove', handleInputMove);
         window.addEventListener('pointerup', handleInputEnd);
         window.addEventListener('pointercancel', handleInputEnd); 
         
-
+ 
         // Pointer-capture on the rail itself: once a pointerdown lands on (or near) the
         // rail, ALL subsequent pointer events route to it until pointerup — no more
         // lost inputs when the cursor drifts slightly above or beside the handle.
@@ -3016,7 +3016,7 @@
                 if (inputState === 'charging') { resetPowerUI(); inputState = 'idle'; }
             });
         })();
-
+ 
         function stepPhysics() {
             let moving = false;
             for (let sub = 0; sub < PHYSICS_SUBSTEPS; sub++) {
@@ -3029,17 +3029,17 @@
             }
             return moving;
         }
-
+ 
         function canControl() {
             return !!cueBall && isGameRunning && !matchEndCondition && !isPaused && !shotActive && !(currentRoomCode && !isMyTurn);
         }
-
+ 
         function setPower(p) {
             currentPower = Math.max(0, Math.min(100, p));
             document.getElementById('power-glow-fill').style.height = currentPower + '%';
             document.getElementById('power-handle').style.top = currentPower + '%';
         }
-
+ 
         // Called once physics has settled. 8-ball is judged here so a scratch on the same shot is seen.
         function finishShot() {
             shotActive = false;
@@ -3050,7 +3050,7 @@
                 updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
             }
         }
-
+ 
         function renderScene() {
             drawCleanTable();
             drawAimSystem(calculateAimTrajectory());
@@ -3064,13 +3064,13 @@
                 ctx.strokeStyle = globalActiveColor; ctx.lineWidth = 2; ctx.stroke();
             }
         }
-
+ 
         function startLoop() {
             cancelAnimationFrame(gameLoopId);
             lastFrameTime = 0; accumulator = 0;
             gameLoopId = requestAnimationFrame(gameLoop);
         }
-
+ 
         function gameLoop(ts) {
             gameLoopId = requestAnimationFrame(gameLoop);
             if (!lastFrameTime) lastFrameTime = ts;
@@ -3078,11 +3078,11 @@
             lastFrameTime = ts;
             fxScale = frameMs / FIXED_DT;
             const dtSec = frameMs / 1000;
-
+ 
             if (isPaused) { renderScene(); return; }
-
+ 
             globalActiveColor = lerpColor(globalActiveColor, getActivePlayerColor(), 1 - Math.pow(0.95, fxScale));
-
+ 
             // keyboard aim + charge
             if (keyCharging) {
                 if (canControl()) setPower(currentPower + 100 * dtSec / 1.4);
@@ -3090,7 +3090,7 @@
             }
             const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
             if (dir && canControl()) aimAngle += dir * (keys.fine ? 0.35 : 1.4) * dtSec;
-
+ 
             accumulator += frameMs;
             let steps = 0;
             while (accumulator >= FIXED_DT && steps < 5) {
@@ -3099,15 +3099,15 @@
                 if (shotActive && !moving) finishShot();
             }
             if (steps >= 5) accumulator = 0;
-
+ 
             if (shakeMag > 0.15) {
                 canvas.style.transform = `translate(${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px, ${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px)`;
                 shakeMag *= Math.pow(0.86, fxScale);
             } else if (shakeMag !== 0) { shakeMag = 0; canvas.style.transform = ''; }
-
+ 
             renderScene();
         }
-
+ 
         function buildThemeGridMenu() {
             const container = document.getElementById('theme-matrix-grid'); 
             container.innerHTML = '';
@@ -3131,13 +3131,13 @@
                 container.appendChild(card);
             });
         }
-
+ 
         document.getElementById('vol-slider').addEventListener('input', function() { 
             sfxVolume = parseFloat(this.value);
             storage.setItem('nb_sfxVolume', sfxVolume);
             sfx.hover(); 
         });
-
+ 
         document.getElementById('toggle-aim').addEventListener('click', function() {
             initAudio(); 
             sfx.click(); 
@@ -3152,7 +3152,7 @@
                 this.innerText = 'DISABLED'; 
             }
         });
-
+ 
         document.getElementById('toggle-cloth').addEventListener('click', function() {
             initAudio(); 
             sfx.click(); 
@@ -3161,7 +3161,7 @@
             this.innerText = clothNames[currentClothIdx]; 
             preRenderCloth(); 
         });
-
+ 
         document.querySelectorAll('.sys-btn:not(.toggle-btn)').forEach(btn => {
             btn.addEventListener('mouseenter', () => { 
                 if (!btn.classList.contains('disabled')) sfx.hover(); 
@@ -3173,7 +3173,7 @@
                 } 
             });
         });
-
+ 
         document.getElementById('btn-menu-local').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('main-menu').style.display = 'none';
@@ -3183,19 +3183,19 @@
             document.getElementById('p1-name-input').value = '';
             document.getElementById('p2-name-input').value = '';
         });
-
+ 
         document.getElementById('btn-menu-settings').addEventListener('click', () => { 
             settingsReturnTarget = 'main'; 
             document.getElementById('main-menu').style.display = 'none'; 
             document.getElementById('settings-menu').style.display = 'flex'; 
         });
-
+ 
         document.getElementById('btn-pause-settings').addEventListener('click', () => { 
             settingsReturnTarget = 'pause'; 
             document.getElementById('pause-menu').style.display = 'none'; 
             document.getElementById('settings-menu').style.display = 'flex'; 
         });
-
+ 
         document.getElementById('btn-settings-back').addEventListener('click', () => {
             document.getElementById('settings-menu').style.display = 'none';
             if (settingsReturnTarget === 'main') { 
@@ -3204,7 +3204,7 @@
                 document.getElementById('pause-menu').style.display = 'flex'; 
             }
         });
-
+ 
         document.getElementById('btn-setup-back').addEventListener('click', () => { 
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('main-menu').style.display = 'flex'; 
@@ -3215,14 +3215,14 @@
             let elem = document.documentElement;
             if (elem.requestFullscreen) { elem.requestFullscreen().catch(()=>{}); } 
             else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-
+ 
             // Launch the game (No name saving here anymore!)
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('game-container').style.display = 'flex';
             leaveRoom();   // make sure no stale online state leaks into a local game
             initLevel(); startLoop();
         });
-
+ 
         function openPause() {
             if (!isGameRunning || matchEndCondition) return;
             if (!currentRoomCode) isPaused = true;          // online: overlay only, the match keeps running for both players
@@ -3254,7 +3254,7 @@
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('main-menu').style.display = 'flex';
         }
-
+ 
         document.getElementById('sys-pause-btn').addEventListener('click', openPause);
         document.getElementById('btn-resume').addEventListener('click', resumeGame);
         document.getElementById('btn-quit').addEventListener('click', () => {
@@ -3269,9 +3269,9 @@
             document.getElementById('end-screen').style.display = 'none';
             exitToMainMenu();
         });
-
+ 
         buildThemeGridMenu();
-
+ 
         // Sync settings controls to loaded localStorage values
         document.getElementById('vol-slider').value = sfxVolume;
         document.getElementById('toggle-cloth').innerText = clothNames[currentClothIdx];
@@ -3280,13 +3280,13 @@
             ab.classList.add('off');
             ab.innerText = 'DISABLED';
         }
-
+ 
         // ══════════════════════════════════════════════════════════════════
         //   FIREBASE ROOM SYSTEM
         //   !! REPLACE firebaseConfig with your own Firebase project values !!
         //   Get them from: Firebase Console → Project Settings → Your Apps
         // ══════════════════════════════════════════════════════════════════
-
+ 
         const firebaseConfig = {
             apiKey: "AIzaSyC2HSr6LycrhxDqioQ_12d0He04lqQyApc",
             authDomain: "neoball-5.firebaseapp.com",
@@ -3297,10 +3297,10 @@
             appId: "1:701481338514:web:0f3b7509f88c117fe2884b",
             measurementId: "G-T6TDF420P2"
         };
-
+ 
         let firebaseApp = null;
         let db = null;
-
+ 
         function initFirebase() {
             if (db) return true;
             try {
@@ -3324,17 +3324,17 @@
                 return false;
             }
         }
-
+ 
         // Auto-initialize right away so 'db' is ready when the script sets up
         initFirebase();
-
+ 
         // ── Room state ──────────────────────────────────────────────────
         let isMyTurn = false;
         let currentRoomCode   = null;
         let isRoomHost        = false;
         let activeRoomRef     = null;
         let activeRoomListener= null;
-
+ 
         // Create-room settings state (independent from local-game settings)
         const SHOT_CLOCK_OPTIONS = [0, 15, 30, 60];
         const SHOT_CLOCK_LABELS  = ['OFF', '15 SEC', '30 SEC', '60 SEC'];
@@ -3342,7 +3342,7 @@
         let roomAimAssist      = true;
         let roomClothIdx       = 0;
         let roomSelectedTheme  = 0;
-
+ 
         // ── Helpers ─────────────────────────────────────────────────────
         function generateRoomCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/1/0 ambiguity
@@ -3350,17 +3350,17 @@
             for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
             return code;
         }
-
+ 
         function hideAllMenuPanels() {
             document.querySelectorAll('.menu-panel').forEach(p => p.style.display = 'none');
         }
-
+ 
         // ── Screen transitions ──────────────────────────────────────────
         function showOnlineMenu() {
             hideAllMenuPanels();
             document.getElementById('online-menu').style.display = 'flex';
         }
-
+ 
         function showCreateRoomScreen() {
             hideAllMenuPanels();
             document.getElementById('create-room-screen').style.display = 'flex';
@@ -3380,7 +3380,7 @@
             document.getElementById('room-toggle-cloth').textContent = clothNames[0];
             buildRoomThemeGrid();
         }
-
+ 
         function showJoinRoomScreen() {
             hideAllMenuPanels();
             document.getElementById('join-room-screen').style.display = 'flex';
@@ -3389,14 +3389,14 @@
             const saved = storage.getItem('nb_p2Name');
             if (saved) document.getElementById('join-guest-name').value = saved;
         }
-
+ 
         function showWaitingRoom(code) {
             hideAllMenuPanels();
             document.getElementById('waiting-room-screen').style.display = 'flex';
             document.getElementById('waiting-code-display').textContent = code;
             document.getElementById('waiting-status-msg').textContent = 'WAITING FOR OPPONENT...';
         }
-
+ 
         // ── Room theme grid ─────────────────────────────────────────────
         function buildRoomThemeGrid() {
             const container = document.getElementById('room-theme-grid');
@@ -3415,21 +3415,21 @@
                 container.appendChild(card);
             });
         }
-
+ 
         // ── Room code input sync ────────────────────────────────────────
         document.getElementById('btn-regen-code').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('create-room-code').textContent = generateRoomCode();
             document.getElementById('custom-code-input').value = '';
         });
-
+ 
         document.getElementById('custom-code-input').addEventListener('input', function() {
             const val = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
             this.value = val;
             const display = document.getElementById('create-room-code');
             display.textContent = val.length > 0 ? val.padEnd(6, '·') : generateRoomCode();
         });
-
+ 
         // ── Room settings toggles ───────────────────────────────────────
         document.getElementById('room-toggle-clock').addEventListener('click', function() {
             initAudio(); sfx.click();
@@ -3438,42 +3438,42 @@
             if (SHOT_CLOCK_OPTIONS[roomShotClockIdx] === 0) this.classList.add('off');
             else this.classList.remove('off');
         });
-
+ 
         document.getElementById('room-toggle-aim').addEventListener('click', function() {
             initAudio(); sfx.click();
             roomAimAssist = !roomAimAssist;
             if (roomAimAssist) { this.classList.remove('off'); this.textContent = 'ENABLED'; }
             else               { this.classList.add('off');    this.textContent = 'DISABLED'; }
         });
-
+ 
         document.getElementById('room-toggle-cloth').addEventListener('click', function() {
             initAudio(); sfx.click();
             roomClothIdx = (roomClothIdx + 1) % clothColors.length;
             this.textContent = clothNames[roomClothIdx];
         });
-
+ 
         // ── Launch Room (host creates it in Firebase) ───────────────────
         document.getElementById('btn-launch-room').addEventListener('click', async () => {
-
+ 
             
-
+ 
             initAudio(); 
             if (typeof sfx !== 'undefined') sfx.click();
-
+ 
             if (!initFirebase()) {
                 alert('Could not reach Firebase.\nCheck your internet connection and disable any ad blocker or VPN for this page, then reload.');
                 return;
             }
-
+ 
             // Resolve room code
             let customVal = document.getElementById('custom-code-input').value.toUpperCase().trim();
             let code = customVal.length === 6 ? customVal
                     : customVal.length > 0   ? customVal.padEnd(6, generateRoomCode()).substring(0, 6)
                     : document.getElementById('create-room-code').textContent.replace(/·/g, '').padEnd(6, generateRoomCode()).substring(0, 6);
-
+ 
             const hostName = document.getElementById('room-host-name').value.trim() || 'PLAYER 01';
             storage.setItem('nb_p1Name', hostName);
-
+ 
             const roomData = {
                 host: hostName,
                 guest: null,
@@ -3486,7 +3486,7 @@
                 },
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
-
+ 
             // ─── YOUR TRY/CATCH BLOCK GOES INSIDE THIS ASYNC WRAPPER ───
             try {
                 // Prevent overwriting an active room
@@ -3495,25 +3495,25 @@
                     alert('That room code is already in use. Please generate a new one.');
                     return;
                 }
-
+ 
                 await db.ref('rooms/' + code).set(roomData);
                 currentRoomCode = code;
                 isRoomHost = true;
-
+ 
                 showWaitingRoom(code);
                 listenForOpponent(code);
-
+ 
                 // Auto-delete room after 10 min if nobody joins
                 setTimeout(() => {
                     if (currentRoomCode === code && db) { db.ref('rooms/' + code + '/status').once('value').then(st => { if (st.val() === 'waiting') db.ref('rooms/' + code).remove(); }).catch(() => {}); }  // only expire rooms nobody joined
                 }, 10 * 60 * 1000);
-
+ 
             } catch(err) {
                 console.error(err);
                 alert('Failed to create room:\n' + err.message);
             }
         }); // ─── END OF ASSYNC WRAPPER ───
-
+ 
         function listenForOpponent(code) {
             let opponentJoined = false;
             if (activeRoomRef && activeRoomListener) activeRoomRef.off('value', activeRoomListener);
@@ -3529,7 +3529,7 @@
                 }
             });
         }
-
+ 
         // ── Join Room ───────────────────────────────────────────────────
         document.getElementById('btn-join-confirm').addEventListener('click', async () => {
             initAudio(); sfx.click();
@@ -3537,51 +3537,58 @@
                 alert('Could not reach Firebase.\nCheck your internet connection and disable any ad blocker or VPN for this page, then reload.');
                 return;
             }
-
+ 
             const code   = document.getElementById('join-code-input').value.trim().toUpperCase();
             const errEl  = document.getElementById('join-error-msg');
-
+ 
             if (!code) { errEl.textContent = '⚠  ENTER A ROOM CODE'; return; }
-
+ 
             const guestName = document.getElementById('join-guest-name').value.trim() || 'PLAYER 02';
             storage.setItem('nb_p2Name', guestName);
-
+ 
             errEl.textContent = 'SEARCHING...';
             errEl.style.color = '#38bdf8';
-
+ 
             try {
                 const snap = await db.ref('rooms/' + code).once('value');
                 const room = snap.val();
-
+ 
                 if (!room)                      { errEl.style.color='#f43f5e'; errEl.textContent = '⚠  ROOM NOT FOUND'; return; }
                 if (room.status !== 'waiting')  { errEl.style.color='#f43f5e'; errEl.textContent = '⚠  ROOM IS FULL OR CLOSED'; return; }
-
+ 
                 const tx = await db.ref('rooms/' + code).transaction(r => {   // atomic: two guests can no longer both join
-                    if (!r || r.status !== 'waiting') return;
+                    // Firebase first calls this with the LOCAL cache, which is null for a room this client
+                    // hasn't loaded. Returning null forces a retry with the real server value.
+                    if (r === null) return r;
+                    if (r.status !== 'waiting') return;      // abort: already taken
                     r.guest = guestName; r.status = 'ready'; return r;
                 });
-                if (!tx.committed) { errEl.style.color = '#f43f5e'; errEl.textContent = '⚠  ROOM IS FULL OR CLOSED'; return; }
-
+                if (!tx.committed || !tx.snapshot.val()) {
+                    errEl.style.color = '#f43f5e';
+                    errEl.textContent = tx.snapshot && tx.snapshot.val() ? '⚠  ROOM IS FULL OR CLOSED' : '⚠  ROOM NOT FOUND';
+                    return;
+                }
+ 
                 currentRoomCode = code;
                 isRoomHost      = false;
                 errEl.textContent = '';
-
+ 
                 startOnlineGame(room, guestName);
-
+ 
             } catch(err) {
                 console.error(err);
                 errEl.style.color = '#f43f5e';
                 errEl.textContent = '⚠  CONNECTION ERROR';
             }
         });
-
+ 
         
-
+ 
         // Auto-uppercase + sanitise join input
         document.getElementById('join-code-input').addEventListener('input', function() {
             this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
         });
-
+ 
         // ── Start online game ───────────────────────────────────────────
         function startOnlineGame(room, guestName = null) {
             // Detach listener so it doesn't fire twice
@@ -3589,7 +3596,7 @@
                 activeRoomRef.off('value', activeRoomListener);
                 activeRoomListener = null;
             }   
-
+ 
             // Apply room settings to the game engine
             const s = room.settings || {};
             roomTimerSetting = (typeof s.shotClock === 'number') ? s.shotClock : 15;   // was never applied before
@@ -3602,14 +3609,14 @@
                 colorP2 = THEME_PRESETS[s.themeIdx].p2;
             }
             preRenderCloth();
-
+ 
             // Set player name inputs so initLevel() picks them up
             document.getElementById('p1-name-input').value = room.host || 'PLAYER 01';
             document.getElementById('p2-name-input').value = (guestName || room.guest) || 'PLAYER 02';
-
+ 
             hideAllMenuPanels();
             // ... previous startOnlineGame code
-
+ 
             document.getElementById('game-container').style.display = 'flex';
             document.getElementById('sys-pause-btn').style.display  = 'block';
             
@@ -3628,11 +3635,11 @@
             watchOpponentPresence(currentRoomCode);
             startLoop();
         }
-
+ 
         // ── Listener bookkeeping, presence, cleanup ─────────────────────
         const trackedListeners = [];
         function trackOn(ref, cb) { ref.on('value', cb); trackedListeners.push({ ref, cb }); }
-
+ 
         // If the opponent's presence node disappears mid-match (tab closed / connection lost) you win.
         function watchOpponentPresence(code) {
             if (!db) return;
@@ -3650,7 +3657,7 @@
                 }
             });
         }
-
+ 
         // Detaches everything, removes presence/room, and restores local settings that online rooms overrode.
         function leaveRoom() {
             trackedListeners.splice(0).forEach(l => { try { l.ref.off('value', l.cb); } catch (_) {} });
@@ -3671,7 +3678,7 @@
             }
             preRenderCloth();
         }
-
+ 
         // ── Cancel Room (host cancels from waiting screen) ──────────────
         document.getElementById('btn-cancel-room').addEventListener('click', async () => {
             initAudio(); sfx.click();
@@ -3686,42 +3693,42 @@
             isRoomHost      = false;
             showOnlineMenu();
         });
-
+ 
         // ── Navigation wiring ───────────────────────────────────────────
         document.getElementById('btn-menu-online').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('main-menu').style.display = 'none';
             showOnlineMenu();
         });
-
+ 
         document.getElementById('btn-online-back').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('online-menu').style.display = 'none';
             document.getElementById('main-menu').style.display = 'flex';
         });
-
+ 
         document.getElementById('btn-create-room').addEventListener('click', () => {
             initAudio(); sfx.click();
             showCreateRoomScreen();
         });
-
+ 
         document.getElementById('btn-join-room').addEventListener('click', () => {
             initAudio(); sfx.click();
             showJoinRoomScreen();
         });
-
+ 
         document.getElementById('btn-create-back').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('create-room-screen').style.display = 'none';
             showOnlineMenu();
         });
-
+ 
         document.getElementById('btn-join-back').addEventListener('click', () => {
             initAudio(); sfx.click();
             document.getElementById('join-room-screen').style.display = 'none';
             showOnlineMenu();
         });
-
+ 
         // Register hover SFX for all new online buttons
         ['btn-menu-online','btn-create-room','btn-join-room','btn-online-back',
          'btn-launch-room','btn-create-back','btn-join-confirm','btn-join-back',
@@ -3759,7 +3766,7 @@
             }
         });
         window.addEventListener('blur', () => { keys.left = keys.right = keys.fine = false; if (keyCharging) { keyCharging = false; resetPowerUI(); } });
-
+ 
         const fxBtn = document.getElementById('toggle-fx');
         function syncFxBtn() { fxBtn.innerText = fxEnabled ? 'ENABLED' : 'DISABLED'; fxBtn.classList.toggle('off', !fxEnabled); }
         syncFxBtn();
@@ -3769,7 +3776,7 @@
             if (!fxEnabled) { shakeMag = 0; canvas.style.transform = ''; }
             syncFxBtn();
         });
-
+ 
         // Don't let a local match run (or the shot clock burn) while the tab is hidden
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isGameRunning && !currentRoomCode && !matchEndCondition) openPause();
@@ -3777,5 +3784,5 @@
     </script>
 </body>
 </html>
-
+ 
     

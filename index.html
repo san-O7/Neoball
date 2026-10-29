@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Neoball</title>
+    <meta name="theme-color" content="#020205">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon-192.png">
  
     <!-- OpenGraph / Social card meta -->
     <meta name="description" content="Neon 8-ball arcade billiards with a cyber aesthetic. Local and online two-player multiplayer, spin English, and shot-clock pressure.">
@@ -1083,11 +1090,27 @@
     <div id="main-menu" class="menu-panel">
         <div class="glitch-title">NEOBALL</div>
         <div class="subtitle">NEON 8-BALL ARCADE</div>
-        <button id="btn-menu-local" class="sys-btn">LOCAL PLAY</button>
+        <button id="btn-play-now" class="sys-btn">PLAY NOW</button>
+        <button id="btn-menu-local" class="sys-btn secondary">LOCAL PLAY / SETUP</button>
         <button id="btn-menu-online" class="sys-btn secondary">ONLINE PLAY</button>
         <button id="btn-menu-settings" class="sys-btn secondary">SETTINGS</button>
+        <button id="btn-menu-howto" class="sys-btn secondary">HOW TO PLAY</button>
+        <button id="btn-install" class="sys-btn secondary" style="display:none;">INSTALL APP</button>
+        <p id="menu-footnote" style="margin:6px 0 0;font-size:9px;letter-spacing:2px;line-height:1.8;color:#475569;font-weight:700;">NO ACCOUNT NEEDED · NAMES AND ROOM CODES ARE SENT TO FIREBASE FOR ONLINE PLAY ONLY</p>
     </div>
  
+    <div id="howto-menu" class="menu-panel" style="display: none;">
+        <h1 class="standard-title">HOW TO PLAY</h1>
+        <div style="text-align:left;font-size:11px;line-height:2;letter-spacing:1px;color:#94a3b8;font-weight:700;margin-bottom:20px;">
+            <b style="color:#fff">AIM</b> — drag on the table (phone: swipe), or use arrow keys.<br>
+            <b style="color:#fff">ENGLISH</b> — dot high = follow, low = draw, sides = curve.<br>
+            <b style="color:#fff">POWER</b> — pull the rail down and release, or hold Space.<br>
+            <b style="color:#fff">GOAL</b> — pot your group (solids or stripes), then the 8-ball.<br>
+            <b style="color:#fff">FOULS</b> — scratch, wrong ball, or no rail = opponent gets ball in hand.<br>
+            <b style="color:#fff">CLOCK</b> — shoot before time runs out or it's a foul.
+        </div>
+        <button id="btn-howto-back" class="sys-btn secondary">BACK</button>
+    </div>
     <div id="settings-menu" class="menu-panel" style="display: none;">
         <h1 class="standard-title">SYSTEM SETTINGS</h1>
         
@@ -1116,6 +1139,8 @@
     <div id="setup-screen" class="menu-panel" style="display: none;">
         <h1 class="standard-title">GAME SETUP</h1>
         
+        <div class="matrix-label">OPPONENT</div>
+        <button id="toggle-opp" class="sys-btn toggle-btn secondary" style="width:100%;margin-bottom:20px;">2ND PLAYER (LOCAL)</button>
         <div class="matrix-label">ENTER PLAYER NAMES</div>
         <div class="name-inputs">
             <input type="text" id="p1-name-input" class="name-input" placeholder="PLAYER 01" maxlength="12" autocomplete="off">
@@ -1209,6 +1234,7 @@
         <div class="room-code-big" id="waiting-code-display">ABC123</div>
         <div class="waiting-pulse-ring"></div>
         <div id="waiting-status-msg">WAITING FOR OPPONENT...</div>
+        <button id="btn-copy-link" class="sys-btn">COPY INVITE LINK</button>
         <button id="btn-cancel-room" class="sys-btn secondary">CANCEL ROOM</button>
     </div>
  
@@ -1550,7 +1576,9 @@
         let fxScale = 1, shakeMag = 0, activePointerId = null, keyCharging = false, localThemeBackup = null;
         const FIXED_DT = 1000 / 60;           // fixed physics step => identical on 60/120/144 Hz and on both online clients
         const matchStats = { shots: [0, 0, 0], pots: [0, 0, 0], fouls: [0, 0, 0] };
-        const keys = { left: false, right: false, fine: false }; 
+        const keys = { left: false, right: false, fine: false };
+        let aiMode = false, aiLevel = 2, aiBusy = false, aiToken = 0;     // 1 easy, 2 medium, 3 hard
+        let oppMode = parseInt(storage.getItem('nb_opp') ?? '0') || 0;     // 0 = human, 1-3 = computer 
         let shotClockInterval = null;
  
         let railHitAfterContact = false;
@@ -1583,7 +1611,7 @@
         }
  
         spinWidget.addEventListener('pointerdown', e => {
-            if (currentRoomCode && !isMyTurn) return;
+            if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
             isDraggingSpin = true;
             try { spinWidget.setPointerCapture(e.pointerId); } catch (_) {}
             updateSpin(e); e.stopPropagation();
@@ -1864,7 +1892,7 @@
             cueBallScratched = false;
             railHitAfterContact = false;
             firstBallHitThisTurn = null; ballsPottedThisTurn = []; eightBallPotted = false;
-            isGameRunning = true; activePointerId = null; keyCharging = false; shakeMag = 0;
+            isGameRunning = true; aiToken++; aiBusy = false; activePointerId = null; keyCharging = false; shakeMag = 0;
             matchStats.shots = [0, 0, 0]; matchStats.pots = [0, 0, 0]; matchStats.fouls = [0, 0, 0];
             p1Name = document.getElementById('p1-name-input').value.trim().toUpperCase() || "PLAYER 01";
             p2Name = document.getElementById('p2-name-input').value.trim().toUpperCase() || "PLAYER 02";
@@ -2735,7 +2763,7 @@
             if (!cueBall || !isGameRunning) return;
             if (e.target.closest && e.target.closest('.menu-panel, #end-screen, #sys-pause-btn')) return;
             if (activePointerId !== null) return;            // ignore extra fingers
-            if (currentRoomCode && !isMyTurn) return;
+            if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
             initAudio();
             if (shotActive || matchEndCondition || isPaused) return;
             activePointerId = e.pointerId;
@@ -2775,7 +2803,7 @@
  
         function handleInputMove(e) {
             if (activePointerId !== null && e.pointerId !== activePointerId) return;
-            if (currentRoomCode && !isMyTurn) return;
+            if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
             if (matchEndCondition || isPaused) return;
             
             let cy = e.clientY;
@@ -2993,7 +3021,7 @@
         (function() {
             const rail = document.getElementById('power-rail-box');
             rail.addEventListener('pointerdown', function(e) {
-                if (currentRoomCode && !isMyTurn) return;
+                if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
                 if (shotActive || matchEndCondition || isPaused) return;
                 initAudio();
                 inputState = 'charging';
@@ -3002,12 +3030,12 @@
                 e.stopPropagation();
             });
             rail.addEventListener('pointermove', function(e) {
-                if (currentRoomCode && !isMyTurn) return;
+                if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
                 if (inputState !== 'charging') return;
                 updatePowerFromY(e.clientY, this.getBoundingClientRect());
             });
             rail.addEventListener('pointerup', function(e) {
-                if (currentRoomCode && !isMyTurn) return;
+                if ((currentRoomCode && !isMyTurn) || isAiTurn()) return;
                 if (inputState !== 'charging') return;
                 if (currentPower > 5) { fireShot(); } else { resetPowerUI(); }
                 inputState = 'idle';
@@ -3031,7 +3059,7 @@
         }
  
         function canControl() {
-            return !!cueBall && isGameRunning && !matchEndCondition && !isPaused && !shotActive && !(currentRoomCode && !isMyTurn);
+            return !!cueBall && isGameRunning && !matchEndCondition && !isPaused && !shotActive && !((currentRoomCode && !isMyTurn) || isAiTurn());
         }
  
         function setPower(p) {
@@ -3100,6 +3128,12 @@
             }
             if (steps >= 5) accumulator = 0;
  
+            if (aiMode && isAiTurn() && !aiBusy && !shotActive && !matchEndCondition && !isPaused && isGameRunning
+                && !balls.some(b => b.active && (b.isSinking || Math.abs(b.vx) > 0.05 || Math.abs(b.vy) > 0.05))) {
+                aiBusy = true; const tk = aiToken;
+                updateTickerMessage((p2Name || 'COMPUTER') + ' IS THINKING...');
+                setTimeout(() => aiTakeTurn(tk), 900);
+            }
             if (shakeMag > 0.15) {
                 canvas.style.transform = `translate(${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px, ${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px)`;
                 shakeMag *= Math.pow(0.86, fxScale);
@@ -3219,7 +3253,9 @@
             // Launch the game (No name saving here anymore!)
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('game-container').style.display = 'flex';
-            leaveRoom();   // make sure no stale online state leaks into a local game
+            leaveRoom();   // no stale online state in a local game
+            aiMode = oppMode > 0; aiLevel = oppMode || 2;
+            const p2i = document.getElementById('p2-name-input'); if (aiMode && !p2i.value.trim()) p2i.value = 'COMPUTER';
             initLevel(); startLoop();
         });
  
@@ -3601,6 +3637,7 @@
             const s = room.settings || {};
             roomTimerSetting = (typeof s.shotClock === 'number') ? s.shotClock : 15;   // was never applied before
             if (localThemeBackup === null) localThemeBackup = selectedThemeIdx;
+            aiMode = false;
             if (s.aimAssist !== undefined)  aimAssistEnabled = s.aimAssist;
             if (s.clothIdx  !== undefined)  currentClothIdx  = s.clothIdx;
             if (s.themeIdx  !== undefined && THEME_PRESETS[s.themeIdx]) {
@@ -3781,6 +3818,136 @@
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isGameRunning && !currentRoomCode && !matchEndCondition) openPause();
         });
+    
+        // ══════════════════════════════════════════════════════════════════
+        //   COMPUTER OPPONENT (ghost-ball shot picker, skill = aim error)
+        // ══════════════════════════════════════════════════════════════════
+        function isAiTurn() { return aiMode && currentPlayer === 2; }
+        function distToSeg(px, py, ax, ay, bx, by) {
+            const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+            let t = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0; t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+        }
+        function aiTargetType() {
+            if (tableIsOpen) return null;
+            const g = playerGroups[2];
+            return balls.some(b => b.active && !b.isSinking && b.type === g) ? g : 'void';
+        }
+        function aiBestShot(cx, cy) {
+            const R = BALL_RADIUS;
+            if (isBreakShot) return { angle: Math.atan2(225 - cy, 580 - cx), power: 88, score: 0 };
+            const tt = aiTargetType();
+            const targets = balls.filter(b => b.active && !b.isSinking && b.type !== 'cue' && (tt ? b.type === tt : b.type !== 'void'));
+            const blocked = (ax, ay, bx, by, skip) => balls.some(o => o.active && !o.isSinking && o.type !== 'cue' && o !== skip && distToSeg(o.x, o.y, ax, ay, bx, by) < 2 * R - 1);
+            let best = null;
+            for (const t of targets) for (const p of pockets) {
+                const px = p.x + p.ox, py = p.y + p.oy, dx = px - t.x, dy = py - t.y, d = Math.hypot(dx, dy);
+                const ux = dx / d, uy = dy / d, gx = t.x - ux * 2 * R, gy = t.y - uy * 2 * R;
+                if (gx < TABLE_LEFT + CUSHION_D + R || gx > TABLE_RIGHT - CUSHION_D - R || gy < TABLE_TOP + CUSHION_D + R || gy > TABLE_BOTTOM - CUSHION_D - R) continue;
+                const vx = gx - cx, vy = gy - cy, cd = Math.hypot(vx, vy);
+                if (cd < 1) continue;
+                const cut = (vx * ux + vy * uy) / cd;
+                if (cut < 0.35 || blocked(cx, cy, gx, gy, t) || blocked(t.x, t.y, px, py, t)) continue;
+                const score = cut * 100 - cd * 0.05 - d * 0.08;
+                if (!best || score > best.score) best = { angle: Math.atan2(vy, vx), power: ((cd + d * 1.6) * 0.02 + 2.5) / 28 * 100, score };
+            }
+            if (!best && targets.length) {      // no clean pot: just make legal contact with the closest ball
+                targets.sort((a, b) => Math.hypot(a.x - cx, a.y - cy) - Math.hypot(b.x - cx, b.y - cy));
+                const t = targets.find(o => !blocked(cx, cy, o.x, o.y, o)) || targets[0];
+                best = { angle: Math.atan2(t.y - cy, t.x - cx), power: 45, score: -100 };
+            }
+            return best || { angle: Math.atan2(225 - cy, 450 - cx), power: 50, score: -200 };
+        }
+        function aiPlaceCueBall() {
+            const R = BALL_RADIUS, m = CUSHION_D + R + 4;
+            let best = null;
+            for (let i = 0; i < 40; i++) {
+                const x = TABLE_LEFT + m + Math.random() * (TABLE_RIGHT - TABLE_LEFT - 2 * m);
+                const y = TABLE_TOP + m + Math.random() * (TABLE_BOTTOM - TABLE_TOP - 2 * m);
+                if (balls.some(b => b.active && b.type !== 'cue' && b.x > -100 && Math.hypot(x - b.x, y - b.y) < 2 * R + 4)) continue;
+                const sh = aiBestShot(x, y);
+                if (!best || sh.score > best.score) best = { x, y, score: sh.score };
+            }
+            if (!best || isBreakShot) best = { x: 240, y: 225 };
+            cueBall.x = best.x; cueBall.y = best.y;
+        }
+        function aiStale(tk) { return tk !== aiToken || !aiMode || !isAiTurn() || shotActive || matchEndCondition || isPaused || !isGameRunning; }
+        function aiTakeTurn(tk) {
+            if (aiStale(tk)) { aiBusy = false; return; }
+            if (isBallInHand) aiPlaceCueBall();
+            const shot = aiBestShot(cueBall.x, cueBall.y);
+            const err = [0, 0.09, 0.04, 0.012][aiLevel];
+            aimAngle = shot.angle + (Math.random() - 0.5) * 2 * err;
+            setPower(Math.max(22, Math.min(92, shot.power * (1 + (Math.random() - 0.5) * (aiLevel === 1 ? 0.35 : 0.15)))));
+            setTimeout(() => {
+                if (aiStale(tk)) { aiBusy = false; return; }
+                const sx = spinX, sy = spinY; spinX = 0; spinY = 0;
+                fireShot();
+                spinX = sx; spinY = sy; aiBusy = false;
+            }, 700);
+        }
+ 
+        // ══════════════════════════════════════════════════════════════════
+        //   RELEASE FEATURES: Play Now, opponent picker, how-to, invite links, install
+        // ══════════════════════════════════════════════════════════════════
+        document.getElementById('btn-play-now').addEventListener('click', () => {
+            initAudio(); sfx.click();
+            leaveRoom(); aiMode = true; aiLevel = oppMode || 2;
+            document.getElementById('p1-name-input').value = 'YOU';
+            document.getElementById('p2-name-input').value = 'COMPUTER';
+            hideAllMenuPanels();
+            document.getElementById('game-container').style.display = 'flex';
+            initLevel(); startLoop();
+        });
+ 
+        const OPP_LABELS = ['2ND PLAYER (LOCAL)', 'COMPUTER · EASY', 'COMPUTER · MEDIUM', 'COMPUTER · HARD'];
+        const oppBtn = document.getElementById('toggle-opp');
+        oppBtn.innerText = OPP_LABELS[oppMode] || OPP_LABELS[0];
+        oppBtn.addEventListener('click', () => {
+            initAudio(); sfx.click();
+            oppMode = (oppMode + 1) % OPP_LABELS.length; storage.setItem('nb_opp', oppMode);
+            oppBtn.innerText = OPP_LABELS[oppMode];
+        });
+ 
+        document.getElementById('btn-menu-howto').addEventListener('click', () => {
+            hideAllMenuPanels(); document.getElementById('howto-menu').style.display = 'flex';
+        });
+        document.getElementById('btn-howto-back').addEventListener('click', () => {
+            document.getElementById('howto-menu').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'flex';
+        });
+ 
+        // Shareable invite link: ?room=ABC123 opens the Join screen with the code filled in
+        document.getElementById('btn-copy-link').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-copy-link');
+            const url = location.origin + location.pathname + '?room=' + currentRoomCode;
+            try {
+                if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) { await navigator.share({ title: 'Neoball', text: 'Play Neoball with me!', url }); return; }
+                await navigator.clipboard.writeText(url);
+                btn.innerText = 'LINK COPIED ✓'; setTimeout(() => { btn.innerText = 'COPY INVITE LINK'; }, 1800);
+            } catch (e) { if (e && e.name !== 'AbortError') window.prompt('Copy this invite link:', url); }
+        });
+        (function () {
+            const code = (new URLSearchParams(location.search).get('room') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+            if (code.length === 6) { showJoinRoomScreen(); document.getElementById('join-code-input').value = code; }
+        })();
+ 
+        // Install button (Chrome/Edge/Android) and iOS hint
+        let deferredInstall = null;
+        const installBtn = document.getElementById('btn-install');
+        window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; installBtn.style.display = 'block'; });
+        installBtn.addEventListener('click', async () => {
+            if (!deferredInstall) return;
+            deferredInstall.prompt(); await deferredInstall.userChoice;
+            deferredInstall = null; installBtn.style.display = 'none';
+        });
+        window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !navigator.standalone) {
+            document.getElementById('menu-footnote').innerText = 'TIP: TAP SHARE → ADD TO HOME SCREEN TO INSTALL';
+        }
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+        }
     </script>
 </body>
 </html>

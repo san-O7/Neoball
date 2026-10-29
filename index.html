@@ -6,12 +6,12 @@
     <title>Neoball</title>
 
     <!-- OpenGraph / Social card meta -->
-    <meta name="description" content="Neon 8-ball arcade billiards with a cyber aesthetic. Two-player local multiplayer, spin English, and shot-clock pressure.">
-    <meta property="og:title" content="NEOBALL HD — Neon 8-Ball Arcade">
+    <meta name="description" content="Neon 8-ball arcade billiards with a cyber aesthetic. Local and online two-player multiplayer, spin English, and shot-clock pressure.">
+    <meta property="og:title" content="NEOBALL — Neon 8-Ball Arcade">
     <meta property="og:description" content="Stylized neon billiards with spin English, power charging, and shot-clock pressure. Free to play in your browser.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="NEOBALL HD — Neon 8-Ball Arcade">
+    <meta name="twitter:title" content="NEOBALL — Neon 8-Ball Arcade">
     <meta name="twitter:description" content="Stylized neon billiards with spin English, power charging, and shot-clock pressure.">
 
     <!-- Cyber / neon display font -->
@@ -22,17 +22,24 @@
     <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        </script>
-
+    <script>
+        // Fallback CDNs: if gstatic is blocked, try jsDelivr, then cdnjs (loaded synchronously so later code sees `firebase`)
+        (function () {
+            var sources = [
+                ['https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js', 'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js'],
+                ['https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js']
+            ];
+            for (var i = 0; i < sources.length && typeof firebase === 'undefined'; i++) {
+                document.write('<script src="' + sources[i][0] + '"><\/script><script src="' + sources[i][1] + '"><\/script>');
+                break; // document.write runs after this block; the next check below chains the second fallback
+            }
+        })();
+    </script>
+    <script>
+        if (typeof firebase === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-database-compat.min.js"><\/script>');
+        }
+    </script>
     <style>
       html { background-color: #020205; }
         body {
@@ -361,7 +368,7 @@
 
         /* Cinematic Full-Screen End Overlay */
         #end-screen {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(4, 5, 13, 0.98); z-index: 200; display: none;
             flex-direction: column; align-items: center; justify-content: center;
             text-align: center; opacity: 0; transition: opacity 0.4s ease; will-change: opacity;
@@ -1064,6 +1071,11 @@
                 flex-wrap: nowrap;
             }
         }
+    
+        input { -webkit-user-select: text; user-select: text; }   /* iOS Safari blocks typing when user-select is none */
+        @media (prefers-reduced-motion: reduce) {
+            .glitch-title, .menu-panel::before, .room-code-big, .waiting-pulse-ring { animation: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -1094,6 +1106,10 @@
             <button id="toggle-cloth" class="sys-btn toggle-btn" style="color: #cbd5e1; border-color: #cbd5e1;">DEEP SPACE</button>
         </div>
 
+        <div class="setting-row">
+            <div class="setting-label">PARTICLES &amp; SHAKE</div>
+            <button id="toggle-fx" class="sys-btn toggle-btn">ENABLED</button>
+        </div>
         <button id="btn-settings-back" class="sys-btn secondary" style="margin-top: 15px;">BACK TO MENU</button>
     </div>
 
@@ -1115,7 +1131,7 @@
 
     <div id="pause-menu" class="menu-panel" style="display: none;">
         <h1 class="standard-title">PAUSED</h1>
-        <p style="color: #94a3b8; font-size: 13px; letter-spacing: 2px; font-weight: 700; margin-bottom: 25px;">GAME PAUSED</p>
+        <p style="color: #94a3b8; font-size: 11px; line-height: 2; letter-spacing: 2px; font-weight: 700; margin-bottom: 25px;">ARROWS / A-D: AIM (SHIFT = FINE)<br>HOLD SPACE: CHARGE · RELEASE: SHOOT<br>P / ESC: PAUSE · M: MUTE</p>
         <button id="btn-resume" class="sys-btn">RESUME PLAY</button>
         <button id="btn-pause-settings" class="sys-btn secondary">SETTINGS</button>
         <button id="btn-quit" class="sys-btn secondary">QUIT TO MENU</button>
@@ -1199,6 +1215,7 @@
     <div id="end-screen">
         <h1 id="end-title" class="victory-title">VICTORY</h1>
         <p id="end-desc" class="victory-desc">PLAYER 1 WINS THE GAME!</p>
+        <p id="end-stats" class="victory-desc" style="margin-top:-40px;font-size:11px;letter-spacing:3px;white-space:pre-line;line-height:1.9;"></p>
         <div class="end-btn-group">
             <button id="btn-rematch" class="sys-btn">REMATCH</button>
             <button id="btn-end-menu" class="sys-btn secondary">MAIN MENU</button>
@@ -1255,27 +1272,13 @@
     </div>
 
     <script>
-        // Disable Right-Click context menu
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // Block common developer keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            // Block F12
-            if (event.keyCode === 123) {
-                event.preventDefault();
-                return false;
-            }
-            // Block Ctrl+Shift+I (Inspect) and Ctrl+Shift+J (Console)
-            if (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) {
-                event.preventDefault();
-                return false;
-            }
-            // Block Ctrl+U (View Source)
-            if (event.ctrlKey && event.keyCode === 85) {
-                event.preventDefault();
-                return false;
-            }
-        });
+        // localStorage can throw (private mode / sandboxed iframes): fall back to memory
+        const storage = (() => {
+            try { const t = window.localStorage; t.getItem('nb_probe'); return t; }
+            catch (e) { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } }; }
+        })();
+        // Suppress the context menu on the table only (long-press / right-click while aiming)
+        document.getElementById('gameCanvas').addEventListener('contextmenu', e => e.preventDefault());
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -1288,13 +1291,16 @@
         }
         setupCanvasScale();
 
-        let sfxVolume     = parseFloat(localStorage.getItem('nb_sfxVolume') ?? '1.0');
-        let aimAssistEnabled = (localStorage.getItem('nb_aimAssist') ?? 'true') === 'true';
-        let settingsReturnTarget = 'main'; 
+        let sfxVolume     = parseFloat(storage.getItem('nb_sfxVolume') ?? '1.0');
+        let aimAssistEnabled = (storage.getItem('nb_aimAssist') ?? 'true') === 'true';
+        let settingsReturnTarget = 'main';
+        const prefersReducedMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let fxEnabled = (storage.getItem('nb_fx') ?? (prefersReducedMotion ? 'false' : 'true')) === 'true';
+        let lastVolume = sfxVolume || 1; 
         
         const clothColors = ['#0b0d1f', '#06170d', '#1a0909', '#140a1f'];
         const clothNames  = ['DEEP SPACE', 'RETRO GREEN', 'CRIMSON RED', 'VOID PURPLE'];
-        let currentClothIdx = parseInt(localStorage.getItem('nb_clothIdx') ?? '0');
+        let currentClothIdx = parseInt(storage.getItem('nb_clothIdx') ?? '0');
 
         const audioCtx = window.AudioContext || window.webkitAudioContext;
         let actx = null;
@@ -1353,7 +1359,7 @@
                 });
             },
             hover: () => sfx.playLayered([{f1: 1500, f2: 1200, vol: 0.02, type: 'sine'}], 0.05),
-            click: () => sfx.playLayered([{f1: 2000, f2: 800, vol: 0.05, type: 'sine'}], 0.08),
+            click: () => { const n = performance.now(); if (n - (sfx._lc || 0) < 60) return; sfx._lc = n; sfx.playLayered([{f1: 2000, f2: 800, vol: 0.05, type: 'sine'}], 0.08); },
             hit: (v, x) => {
                 if (!actx || sfxVolume <= 0) return;
                 let t = actx.currentTime;
@@ -1529,16 +1535,22 @@
         let cueBall = null; 
         let isBallInHand = false; 
         let shotActive = false;
-        let gameMatchStartTime = 0;
+        
         let lastProcessedShotTime = 0;
         let matchEndCondition = false;
-        let isOnlineMode = false;
+        
         let isPaused = false; 
         let gameLoopId = null; 
         let inputState = 'idle'; 
         let aimAngle = 0; 
         let currentPower = 0; 
-        let timeLeft = 15.0; 
+        let timeLeft = 15.0;
+        let roomTimerSetting = 15.0;          // seconds; 0 = shot clock off (set from room settings online)
+        let isGameRunning = false, eightBallPotted = false, lastFrameTime = 0, accumulator = 0;
+        let fxScale = 1, shakeMag = 0, activePointerId = null, keyCharging = false, localThemeBackup = null;
+        const FIXED_DT = 1000 / 60;           // fixed physics step => identical on 60/120/144 Hz and on both online clients
+        const matchStats = { shots: [0, 0, 0], pots: [0, 0, 0], fouls: [0, 0, 0] };
+        const keys = { left: false, right: false, fine: false }; 
         let shotClockInterval = null;
 
         let railHitAfterContact = false;
@@ -1551,8 +1563,8 @@
 
         function updateSpin(e) {
             let rect = spinWidget.getBoundingClientRect();
-            let cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; 
-            let cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            let cx = (e.clientX) - rect.left; 
+            let cy = (e.clientY) - rect.top;
             
             let nx = (cx / rect.width) * 2 - 1;
             let ny = (cy / rect.height) * 2 - 1;
@@ -1570,12 +1582,16 @@
             spinReticle.style.top = `${(ny + 1) / 2 * 100}%`;
         }
 
-        spinWidget.addEventListener('mousedown', (e) => { if (currentRoomCode && !isMyTurn) return; isDraggingSpin = true; updateSpin(e); e.stopPropagation(); });
-        window.addEventListener('mousemove', (e) => {if (currentRoomCode && !isMyTurn) return; if(isDraggingSpin) updateSpin(e); });
-        window.addEventListener('mouseup', () => {if (currentRoomCode && !isMyTurn) return; isDraggingSpin = false; });
-        spinWidget.addEventListener('touchstart', (e) => { isDraggingSpin = true; updateSpin(e); e.stopPropagation(); }, {passive: false});
-        window.addEventListener('touchmove', (e) => { if(isDraggingSpin) updateSpin(e); }, {passive: false});
-        window.addEventListener('touchend', () => { isDraggingSpin = false; });
+        spinWidget.addEventListener('pointerdown', e => {
+            if (currentRoomCode && !isMyTurn) return;
+            isDraggingSpin = true;
+            try { spinWidget.setPointerCapture(e.pointerId); } catch (_) {}
+            updateSpin(e); e.stopPropagation();
+        });
+        spinWidget.addEventListener('pointermove', e => { if (isDraggingSpin) updateSpin(e); });
+        const endSpinDrag = () => { isDraggingSpin = false; };
+        spinWidget.addEventListener('pointerup', endSpinDrag);
+        spinWidget.addEventListener('pointercancel', endSpinDrag);
 
         function preRenderCloth() {
             const dpr = window.devicePixelRatio || 1;
@@ -1647,7 +1663,7 @@
                 
                 let targetColor = this.getActiveColorMap();
                 if(this.type !== 'cue' && this.type !== 'void') {
-                    this.currentColor = lerpColor(this.currentColor, targetColor, 0.1);
+                    this.currentColor = lerpColor(this.currentColor, targetColor, 1 - Math.pow(0.9, fxScale));
                 }
 
                 ctx.save();
@@ -1830,8 +1846,7 @@
                     this.vx = 0; 
                     this.vy = 0; 
                 } else {
-                    ballsPottedThisTurn.push(this.type);
-                    if (this.type === 'void') evaluateVoidBallRules();
+                    ballsPottedThisTurn.push(this.type); matchStats.pots[currentPlayer]++; spawnBurstFx(this.targetPx, this.targetPy, globalActiveColor, 18); if (this.type === 'void') eightBallPotted = true;  // judged at end of shot
                 }
             }
         }
@@ -1848,7 +1863,9 @@
             shotActive = false; 
             cueBallScratched = false;
             railHitAfterContact = false;
-            
+            firstBallHitThisTurn = null; ballsPottedThisTurn = []; eightBallPotted = false;
+            isGameRunning = true; activePointerId = null; keyCharging = false; shakeMag = 0;
+            matchStats.shots = [0, 0, 0]; matchStats.pots = [0, 0, 0]; matchStats.fouls = [0, 0, 0];
             p1Name = document.getElementById('p1-name-input').value.trim().toUpperCase() || "PLAYER 01";
             p2Name = document.getElementById('p2-name-input').value.trim().toUpperCase() || "PLAYER 02";
 
@@ -1863,7 +1880,7 @@
             document.getElementById('p1-tray').innerHTML = ''; 
             document.getElementById('p2-tray').innerHTML = '';
 
-            cueBall = new Ball(240, 225, 'white'); 
+            cueBall = new Ball(240, 225, 0);   // num 0 = cue (was the string 'white', which made the cue ball a 'stripes' ball) 
             balls.push(cueBall);
             
             const startX = 580; 
@@ -1900,17 +1917,19 @@
             if (matchEndCondition) return; 
             
             // Grab your room setting, defaulting to 15.0 if undefined
-            timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0; 
-            updateClockUI();
-            
+            if (roomTimerSetting <= 0) {
+                timeLeft = 0;
+                const c = document.getElementById('countdown-clock');
+                if (c) { c.innerText = 'SHOT CLOCK: OFF'; c.style.color = globalActiveColor; c.style.textShadow = 'none'; }
+                return;
+            }
+            timeLeft = roomTimerSetting; updateClockUI();
             shotClockInterval = setInterval(() => {
                 
             
                 if (shotActive) {
                     clearInterval(shotClockInterval);
-                    timeLeft = typeof roomTimerSetting !== 'undefined' ? roomTimerSetting : 15.0;
-                    updateClockUI();
-                    return;
+                    timeLeft = roomTimerSetting; updateClockUI(); return;
                 }
                 // ───────────────────────────────────────────────
 
@@ -1932,6 +1951,17 @@
             }, 100);
         }
 
+        // Pushes the authoritative turn state (used by turn end AND timeout fouls) so the opponent unlocks correctly
+        function syncTurnState() {
+            if (!currentRoomCode || !db) return;
+            const ballsPos = balls.map(b => ({ num: b.num, x: b.x, y: b.y, active: b.active }));
+            db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
+                activePlayer: currentPlayer, isBallInHand: isBallInHand, tableIsOpen: tableIsOpen,
+                groups: { 1: playerGroups[1] || '', 2: playerGroups[2] || '' },
+                ballsPos: ballsPos, timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).catch(err => console.error('Turn sync failed:', err));
+        }
+
         function updateClockUI() {
             const clock = document.getElementById('countdown-clock'); 
             if (!clock) return;
@@ -1948,10 +1978,7 @@
         }
 
         function handleTimeoutFoul() {
-            inputState = 'idle'; 
-            resetPowerUI(); 
-            
-            let nextPlayer = currentPlayer === 1 ? 2 : 1;
+            inputState = 'idle'; keyCharging = false; resetPowerUI(); matchStats.fouls[currentPlayer]++; let nextPlayer = currentPlayer === 1 ? 2 : 1;
             
             sfx.foul(); 
             spawnTextFx("TIME'S UP!", cueBall.x !== -999 ? cueBall.x : 450, cueBall.y !== -999 ? cueBall.y : 225, "#f43f5e");
@@ -1967,18 +1994,7 @@
             updateScoreboardDisplay(); 
 
             // 👇 --- NEW MULTIPLAYER SYNC FIX --- 👇
-            if (typeof currentRoomCode !== 'undefined' && currentRoomCode) {
-                // 1. Physically lock the local controls for the player who timed out
-                isMyTurn = false; 
-                
-                // 2. Push the new turn and ball-in-hand status to Firebase 
-                // so Player 2's screen unlocks and they can drag the cue ball!
-                db.ref('rooms/' + currentRoomCode + '/gameState').update({
-                    currentPlayer: nextPlayer,
-                    isBallInHand: true,
-                    shotActive: false
-                }).catch(err => console.error("Firebase timeout sync failed:", err));
-            }
+            if (currentRoomCode) { isMyTurn = false; syncTurnState(); }
             // 👆 -------------------------------- 👆
 
             startShotClock();
@@ -1992,38 +2008,54 @@
             visualFx.push({ type: 'ripple', x, y, color, radius: BALL_RADIUS, life: 1.0 }); 
         }
         
+        function spawnBurstFx(x, y, color, n = 12) {
+            if (!fxEnabled || visualFx.length > 220) return;
+            for (let i = 0; i < n; i++) {
+                const a = Math.random() * Math.PI * 2, sp = 1 + Math.random() * 3.5;
+                visualFx.push({ type: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, color, life: 1.0 });
+            }
+        }
+        function addShake(mag) { if (fxEnabled) shakeMag = Math.max(shakeMag, Math.min(6, mag)); }
+
         function renderFx(ctx) {
             for (let i = visualFx.length - 1; i >= 0; i--) {
-                let fx = visualFx[i]; 
-                
-                ctx.save(); 
+                let fx = visualFx[i];
+                ctx.save();
                 ctx.globalAlpha = Math.max(0, fx.life);
-                
                 if (fx.type === 'text') {
-                    fx.y -= 0.5; 
-                    ctx.font = '900 11px "Segoe UI", sans-serif'; 
-                    ctx.fillStyle = fx.color; 
-                    ctx.textAlign = 'center'; 
-                    ctx.fillText(fx.msg, fx.x, fx.y); 
-                    fx.life -= 0.015;
+                    fx.y -= 0.5 * fxScale;
+                    ctx.font = '900 11px "Segoe UI", sans-serif';
+                    ctx.fillStyle = fx.color; ctx.textAlign = 'center';
+                    ctx.fillText(fx.msg, fx.x, fx.y);
+                    fx.life -= 0.015 * fxScale;
                 } else if (fx.type === 'ripple') {
-                    fx.radius += 2.0; 
-                    ctx.beginPath(); 
-                    ctx.arc(fx.x, fx.y, fx.radius, 0, Math.PI * 2); 
-                    ctx.strokeStyle = fx.color; 
-                    ctx.lineWidth = 1.5; 
-                    ctx.stroke(); 
-                    fx.life -= 0.04;
+                    fx.radius += 2.0 * fxScale;
+                    ctx.beginPath(); ctx.arc(fx.x, fx.y, fx.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = fx.color; ctx.lineWidth = 1.5; ctx.stroke();
+                    fx.life -= 0.04 * fxScale;
+                } else if (fx.type === 'spark') {
+                    fx.x += fx.vx * fxScale; fx.y += fx.vy * fxScale;
+                    fx.vx *= Math.pow(0.96, fxScale); fx.vy *= Math.pow(0.96, fxScale);
+                    ctx.fillStyle = fx.color; ctx.fillRect(fx.x - 1, fx.y - 1, 2, 2);
+                    fx.life -= 0.035 * fxScale;
                 }
-                
-                ctx.restore(); 
-                
+                ctx.restore();
                 if (fx.life <= 0) visualFx.splice(i, 1);
             }
         }
 
-        function showEndScreen(title, desc, color = "#ffffff") {
-            matchEndCondition = true; 
+        function formatMatchStats() {
+            const f = i => `${i === 1 ? p1Name : p2Name}: ${matchStats.shots[i]} SHOTS · ${matchStats.pots[i]} POTS · ${matchStats.fouls[i]} FOULS`;
+            let out = f(1) + '\n' + f(2);
+            if (!currentRoomCode) {
+                const n = (parseInt(storage.getItem('nb_games') || '0') || 0) + 1;
+                storage.setItem('nb_games', n);
+                out += `\nLOCAL MATCHES PLAYED: ${n}`;
+            }
+            return out;
+        }
+
+        function showEndScreen(title, desc, color = "#ffffff") { if (matchEndCondition) return; matchEndCondition = true; isGameRunning = false; keyCharging = false; 
             clearInterval(shotClockInterval);
             
             const titleEl = document.getElementById('end-title'); 
@@ -2032,6 +2064,8 @@
             titleEl.style.textShadow = `0 0 30px ${color}, 0 0 60px ${color}`;
             
             document.getElementById('end-desc').innerText = desc;
+            document.getElementById('end-stats').innerText = formatMatchStats();
+            document.getElementById('btn-rematch').style.display = currentRoomCode ? 'none' : 'block';
             
             const endScreen = document.getElementById('end-screen'); 
             endScreen.style.display = 'flex'; 
@@ -2046,6 +2080,7 @@
         }
 
         function evaluateVoidBallRules() {
+            eightBallPotted = false;
             let oppName = currentPlayer === 1 ? p2Name : p1Name; 
             let pColor = currentPlayer === 1 ? colorP1 : colorP2; 
             let oppColor = currentPlayer === 1 ? colorP2 : colorP1;
@@ -2062,7 +2097,7 @@
                 sfx.foul(); 
                 showEndScreen("GAME OVER", `${oppName} WINS (8-BALL POTTED EARLY)`, oppColor); 
             } else {
-                if(cueBallScratched) { 
+                if (cueBallScratched || firstBallHitThisTurn !== 'void') {   // scratch OR didn't hit the 8 first = loss 
                     sfx.foul(); 
                     showEndScreen("GAME OVER", `FOUL ON 8-BALL: ${oppName} WINS!`, oppColor); 
                 } else { 
@@ -2106,7 +2141,8 @@
                         let velAlongNormal = nx * kx + ny * ky;
                         
                         if (velAlongNormal > 0) {
-                            sfx.hit(velAlongNormal, b1.x); 
+                            sfx.hit(velAlongNormal, b1.x);
+                            if (velAlongNormal > 5) { spawnBurstFx((b1.x + b2.x) / 2, (b1.y + b2.y) / 2, '#ffffff', 4); addShake(velAlongNormal * 0.15); } 
                             
                             let impulse = (1 + RESTITUTION) * velAlongNormal / (b1.mass + b2.mass);
                             
@@ -2457,6 +2493,9 @@
             let switchTurn = true; 
             let msg = ""; 
             let myGroup = playerGroups[currentPlayer];
+            // Once a player has cleared their group, the 8-ball becomes the legal first contact
+            let ownLeft = !tableIsOpen && balls.some(b => b.active && b.type === myGroup);
+            let requiredType = tableIsOpen ? null : (ownLeft ? myGroup : 'void');
             
             if (cueBallScratched) {
                 msg = "FOUL: CUE BALL POTTED"; 
@@ -2487,8 +2526,8 @@
             } else if (firstBallHitThisTurn === null) { 
                 msg = "FOUL: NO BALL HIT"; 
                 isBallInHand = true; 
-            } else if (!tableIsOpen && firstBallHitThisTurn !== myGroup) { 
-                msg = `FOUL: WRONG BALL HIT (MUST HIT ${myGroup ? myGroup.toUpperCase() : '?'})`; 
+            } else if (!tableIsOpen && firstBallHitThisTurn !== requiredType) { 
+                msg = `FOUL: WRONG BALL HIT (MUST HIT ${requiredType === 'void' ? '8-BALL' : requiredType.toUpperCase()})`; 
                 isBallInHand = true; 
             } else if (tableIsOpen && firstBallHitThisTurn === 'void') { 
                 msg = "FOUL: CANNOT HIT 8-BALL FIRST"; 
@@ -2499,7 +2538,7 @@
             }
 
             if (isBallInHand) {
-                if (!cueBallScratched) sfx.foul(); 
+                matchStats.fouls[currentPlayer]++; if (!cueBallScratched) sfx.foul(); 
                 spawnTextFx("FOUL!", 450, 225, "#f43f5e"); 
                 updateTickerMessage(`${msg} -> OPPONENT BALL IN HAND`); 
                 currentPlayer = nextPlayer;
@@ -2550,19 +2589,7 @@
 
             // ─── MULTIPLAYER TURN SYNC ─────────────────────────────────────────
             if (currentRoomCode) {
-                // Collect exactly where every ball is to snap the other player's screen into sync
-                let syncBalls = balls.map(b => ({
-                    num: b.num, x: b.x, y: b.y, active: b.active
-                }));
-
-                db.ref('rooms/' + currentRoomCode + '/gameState/turnEnd').set({
-                    activePlayer: currentPlayer,
-                    isBallInHand: isBallInHand,
-                    tableIsOpen: tableIsOpen,
-                    groups: playerGroups,
-                    ballsPos: syncBalls,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
+                syncTurnState();
 
                 // Determine if it is MY turn locally based on my Host/Guest status
                 if (isRoomHost) {
@@ -2684,8 +2711,8 @@
 
         function parseCanvasCoords(e) {
             const rect = canvas.getBoundingClientRect();
-            let cx = e.touches ? e.touches[0].clientX : e.clientX; 
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let cx = e.clientX; 
+            let cy = e.clientY;
             return { 
                 x: (cx - rect.left) * (900 / rect.width), 
                 y: (cy - rect.top) * (450 / rect.height) 
@@ -2705,19 +2732,22 @@
         let previousTouchY = null;
 
         function handleInputStart(e) {
-            if (!cueBall) return;
+            if (!cueBall || !isGameRunning) return;
+            if (e.target.closest && e.target.closest('.menu-panel, #end-screen, #sys-pause-btn')) return;
+            if (activePointerId !== null) return;            // ignore extra fingers
             if (currentRoomCode && !isMyTurn) return;
-            initAudio(); 
+            initAudio();
             if (shotActive || matchEndCondition || isPaused) return;
+            activePointerId = e.pointerId;
             
             // Track start position for mobile rotation so it doesn't jump
-            if (e.touches && e.touches.length > 0) {
-                previousTouchX = e.touches[0].clientX;
-                previousTouchY = e.touches[0].clientY;
+            if (e.pointerType === 'touch') {
+                previousTouchX = e.clientX;
+                previousTouchY = e.clientY;
             }
 
-            let cx = e.touches ? e.touches[0].clientX : e.clientX; 
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let cx = e.clientX; 
+            let cy = e.clientY;
             
             let rail = document.getElementById('power-rail-box'); 
             let rect = rail.getBoundingClientRect();
@@ -2737,17 +2767,18 @@
                 inputState = 'aiming'; 
                 // DESKTOP: Snap aim immediately to the cursor. 
                 // MOBILE: Do not snap on tap, wait for swipe.
-                if (!e.touches) {
+                if (e.pointerType !== 'touch') {
                     aimAngle = Math.atan2(p.y - cueBall.y, p.x - cueBall.x); 
                 }
             }
         }
 
         function handleInputMove(e) {
+            if (activePointerId !== null && e.pointerId !== activePointerId) return;
             if (currentRoomCode && !isMyTurn) return;
             if (matchEndCondition || isPaused) return;
             
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
+            let cy = e.clientY;
             
             if (inputState === 'charging') { 
                 updatePowerFromY(cy, document.getElementById('power-rail-box').getBoundingClientRect()); 
@@ -2770,10 +2801,10 @@
                     cueBall.y = prospectiveY; 
                 }
             } else if (inputState === 'aiming') { 
-                if (e.touches && e.touches.length > 0) {
+                if (e.pointerType === 'touch') {
                     // MOBILE: 8-Ball Pool style swipe rotation
-                    const currentTouchX = e.touches[0].clientX;
-                    const currentTouchY = e.touches[0].clientY;
+                    const currentTouchX = e.clientX;
+                    const currentTouchY = e.clientY;
                     
                     if (previousTouchX !== null && previousTouchY !== null) {
                         const deltaX = currentTouchX - previousTouchX;
@@ -2796,6 +2827,8 @@
         }
 
         function handleInputEnd(e) {
+            if (e && activePointerId !== null && e.pointerId !== activePointerId) return;
+            activePointerId = null;
             if (isPaused) return;
             
             if (inputState === 'dragging_ball') { 
@@ -2818,7 +2851,7 @@
         }
 
         function fireShot() {
-            isBallInHand = false; 
+            isBallInHand = false; matchStats.shots[currentPlayer]++; 
             let impulse = (currentPower / 100) * 28; 
             
             sfx.shoot(currentPower);
@@ -2860,7 +2893,7 @@
         }
 
         function listenForGameUpdates(code) {
-            db.ref('rooms/' + code + '/gameState/lastShot').on('value', (snap) => {
+            trackOn(db.ref('rooms/' + code + '/gameState/lastShot'), (snap) => {
                 const shotData = snap.val();
                 
                 // Figure out who I am
@@ -2893,7 +2926,7 @@
 
             // 2. Listen for End-of-Turn sync data
             // Inside listenForGameUpdates -> turnEnd listener:
-            db.ref('rooms/' + code + '/gameState/turnEnd').on('value', (snap) => {
+            trackOn(db.ref('rooms/' + code + '/gameState/turnEnd'), (snap) => {
                 const turnData = snap.val();
                 if (turnData) {
                     shotActive = false; 
@@ -2941,17 +2974,18 @@
 
                     applyActivePlayerUI();
                     updateScoreboardDisplay();
+                    updateTickerMessage(isMyTurn ? (isBallInHand ? 'BALL IN HAND: DRAG WHITE BALL' : 'YOUR TURN! DRAG TO AIM.') : 'OPPONENT IS SHOOTING...');
+                    startShotClock();   // guest's clock previously never restarted
                 }
             });
         }
 
-        window.addEventListener('mousedown', handleInputStart); 
-        window.addEventListener('mousemove', handleInputMove); 
-        window.addEventListener('mouseup', handleInputEnd);
+        // ---------- INPUT: unified Pointer Events (no more double-firing touch + synthesized mouse) ----------
+        window.addEventListener('pointerdown', handleInputStart);
+        window.addEventListener('pointermove', handleInputMove);
+        window.addEventListener('pointerup', handleInputEnd);
+        window.addEventListener('pointercancel', handleInputEnd); 
         
-        window.addEventListener('touchstart', handleInputStart, { passive: true }); 
-        window.addEventListener('touchmove', handleInputMove, { passive: true }); 
-        window.addEventListener('touchend', handleInputEnd);
 
         // Pointer-capture on the rail itself: once a pointerdown lands on (or near) the
         // rail, ALL subsequent pointer events route to it until pointerup — no more
@@ -2983,58 +3017,95 @@
             });
         })();
 
-        function gameLoop() {
-            gameLoopId = requestAnimationFrame(gameLoop);
-            
-            if (isPaused) {
-                drawCleanTable(); 
-                drawAimSystem(calculateAimTrajectory());
-                for (let b of balls) { if (b.type !== 'cue') b.draw(ctx); }
-                for (let b of balls) { if (b.type === 'cue') b.draw(ctx); }
-                drawCueStick(); 
-                renderFx(ctx); 
-                return;
-            }
-
-            let moving = false; 
-            globalActiveColor = lerpColor(globalActiveColor, getActivePlayerColor(), 0.05);
-            
-            for (let s = 0; s < PHYSICS_SUBSTEPS; s++) {
-                resolveCollisions(); 
+        function stepPhysics() {
+            let moving = false;
+            for (let sub = 0; sub < PHYSICS_SUBSTEPS; sub++) {
+                resolveCollisions();
                 resolveCushionsAndPockets();
-                
-                for (let b of balls) { 
-                    b.updatePos(PHYSICS_SUBSTEPS); 
-                    if (b.active && (b.isSinking || Math.abs(b.vx) > 0.01 || Math.abs(b.vy) > 0.01)) { 
-                        moving = true; 
-                    } 
+                for (let b of balls) {
+                    b.updatePos(PHYSICS_SUBSTEPS);
+                    if (b.active && (b.isSinking || Math.abs(b.vx) > 0.01 || Math.abs(b.vy) > 0.01)) moving = true;
                 }
             }
-            
-            if (shotActive && !moving) { 
-                shotActive = false; 
-                if (isRoomHost) {
-                        processTurnEnd(); 
-                } else {
-                        updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
-                    }
-                }
-            drawCleanTable(); 
+            return moving;
+        }
+
+        function canControl() {
+            return !!cueBall && isGameRunning && !matchEndCondition && !isPaused && !shotActive && !(currentRoomCode && !isMyTurn);
+        }
+
+        function setPower(p) {
+            currentPower = Math.max(0, Math.min(100, p));
+            document.getElementById('power-glow-fill').style.height = currentPower + '%';
+            document.getElementById('power-handle').style.top = currentPower + '%';
+        }
+
+        // Called once physics has settled. 8-ball is judged here so a scratch on the same shot is seen.
+        function finishShot() {
+            shotActive = false;
+            if (eightBallPotted) { evaluateVoidBallRules(); if (matchEndCondition) return; }
+            if (!currentRoomCode || isRoomHost) {      // BUG FIX: local games used to skip this and never switched turns
+                processTurnEnd();
+            } else {
+                updateTickerMessage("SYNCING BOARD STATE WITH HOST...");
+            }
+        }
+
+        function renderScene() {
+            drawCleanTable();
             drawAimSystem(calculateAimTrajectory());
-            
             for (let b of balls) { if (b.type !== 'cue') b.draw(ctx); }
             for (let b of balls) { if (b.type === 'cue') b.draw(ctx); }
-            
-            drawCueStick(); 
-            renderFx(ctx); 
-
+            drawCueStick();
+            renderFx(ctx);
             if (isBallInHand && !shotActive && inputState !== 'dragging_ball') {
-                ctx.beginPath(); 
-                ctx.arc(cueBall.x, cueBall.y, BALL_RADIUS * 1.5, 0, Math.PI * 2); 
-                ctx.strokeStyle = globalActiveColor; 
-                ctx.lineWidth = 2; 
-                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(cueBall.x, cueBall.y, BALL_RADIUS * 1.5, 0, Math.PI * 2);
+                ctx.strokeStyle = globalActiveColor; ctx.lineWidth = 2; ctx.stroke();
             }
+        }
+
+        function startLoop() {
+            cancelAnimationFrame(gameLoopId);
+            lastFrameTime = 0; accumulator = 0;
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(ts) {
+            gameLoopId = requestAnimationFrame(gameLoop);
+            if (!lastFrameTime) lastFrameTime = ts;
+            const frameMs = Math.min(ts - lastFrameTime, 100);   // clamp after tab switches
+            lastFrameTime = ts;
+            fxScale = frameMs / FIXED_DT;
+            const dtSec = frameMs / 1000;
+
+            if (isPaused) { renderScene(); return; }
+
+            globalActiveColor = lerpColor(globalActiveColor, getActivePlayerColor(), 1 - Math.pow(0.95, fxScale));
+
+            // keyboard aim + charge
+            if (keyCharging) {
+                if (canControl()) setPower(currentPower + 100 * dtSec / 1.4);
+                else { keyCharging = false; resetPowerUI(); }
+            }
+            const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+            if (dir && canControl()) aimAngle += dir * (keys.fine ? 0.35 : 1.4) * dtSec;
+
+            accumulator += frameMs;
+            let steps = 0;
+            while (accumulator >= FIXED_DT && steps < 5) {
+                const moving = stepPhysics();
+                accumulator -= FIXED_DT; steps++;
+                if (shotActive && !moving) finishShot();
+            }
+            if (steps >= 5) accumulator = 0;
+
+            if (shakeMag > 0.15) {
+                canvas.style.transform = `translate(${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px, ${((Math.random() - 0.5) * shakeMag * 2).toFixed(2)}px)`;
+                shakeMag *= Math.pow(0.86, fxScale);
+            } else if (shakeMag !== 0) { shakeMag = 0; canvas.style.transform = ''; }
+
+            renderScene();
         }
 
         function buildThemeGridMenu() {
@@ -3063,7 +3134,7 @@
 
         document.getElementById('vol-slider').addEventListener('input', function() { 
             sfxVolume = parseFloat(this.value);
-            localStorage.setItem('nb_sfxVolume', sfxVolume);
+            storage.setItem('nb_sfxVolume', sfxVolume);
             sfx.hover(); 
         });
 
@@ -3071,7 +3142,7 @@
             initAudio(); 
             sfx.click(); 
             aimAssistEnabled = !aimAssistEnabled;
-            localStorage.setItem('nb_aimAssist', aimAssistEnabled);
+            storage.setItem('nb_aimAssist', aimAssistEnabled);
             
             if (aimAssistEnabled) { 
                 this.classList.remove('off'); 
@@ -3086,7 +3157,7 @@
             initAudio(); 
             sfx.click(); 
             currentClothIdx = (currentClothIdx + 1) % clothColors.length;
-            localStorage.setItem('nb_clothIdx', currentClothIdx);
+            storage.setItem('nb_clothIdx', currentClothIdx);
             this.innerText = clothNames[currentClothIdx]; 
             preRenderCloth(); 
         });
@@ -3148,43 +3219,55 @@
             // Launch the game (No name saving here anymore!)
             document.getElementById('setup-screen').style.display = 'none'; 
             document.getElementById('game-container').style.display = 'flex';
-            initLevel(); 
-            gameLoopId = requestAnimationFrame(gameLoop);
+            leaveRoom();   // make sure no stale online state leaks into a local game
+            initLevel(); startLoop();
         });
 
-        document.getElementById('sys-pause-btn').addEventListener('click', () => {
-            if (!matchEndCondition && !shotActive) { 
-                isPaused = true; 
-                document.getElementById('pause-menu').style.display = 'flex'; 
-                document.getElementById('sys-pause-btn').style.display = 'none'; 
-            }
-        });
-
-        document.getElementById('btn-resume').addEventListener('click', () => { 
-            isPaused = false; 
-            document.getElementById('pause-menu').style.display = 'none'; 
-            document.getElementById('sys-pause-btn').style.display = 'block'; 
-        });
-
-        document.getElementById('btn-quit').addEventListener('click', () => {
-            isPaused = false; 
-            cancelAnimationFrame(gameLoopId); 
-            clearInterval(shotClockInterval);
-            document.getElementById('pause-menu').style.display = 'none'; 
-            document.getElementById('game-container').style.display = 'none'; 
-            document.getElementById('main-menu').style.display = 'flex';
-        });
-
-        document.getElementById('btn-rematch').addEventListener('click', () => { 
-            document.getElementById('end-screen').style.display = 'none'; 
-            initLevel(); 
-        });
-
-        document.getElementById('btn-end-menu').addEventListener('click', () => {
-            document.getElementById('end-screen').style.display = 'none'; 
+        function openPause() {
+            if (!isGameRunning || matchEndCondition) return;
+            if (!currentRoomCode) isPaused = true;          // online: overlay only, the match keeps running for both players
+            document.getElementById('pause-menu').style.display = 'flex';
+            document.getElementById('sys-pause-btn').style.display = 'none';
+        }
+        function resumeGame() {
+            isPaused = false; lastFrameTime = 0;
+            document.getElementById('pause-menu').style.display = 'none';
+            if (isGameRunning) document.getElementById('sys-pause-btn').style.display = 'block';
+        }
+        function togglePause() {
+            if (!isGameRunning || matchEndCondition) return;
+            if (document.getElementById('settings-menu').style.display === 'flex') return;
+            if (document.getElementById('pause-menu').style.display === 'flex') resumeGame(); else openPause();
+        }
+        function toggleMute() {
+            if (sfxVolume > 0) { lastVolume = sfxVolume; sfxVolume = 0; } else { sfxVolume = lastVolume || 1; }
+            document.getElementById('vol-slider').value = sfxVolume;
+            storage.setItem('nb_sfxVolume', sfxVolume);
+            updateTickerMessage(sfxVolume > 0 ? 'SOUND ON' : 'SOUND MUTED');
+        }
+        function exitToMainMenu() {
+            isPaused = false; isGameRunning = false; keyCharging = false;
+            cancelAnimationFrame(gameLoopId); clearInterval(shotClockInterval);
+            resetPowerUI(); canvas.style.transform = '';
+            leaveRoom();    // BUG FIX: quitting used to leave currentRoomCode set, which froze controls in the next local game
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
             document.getElementById('game-container').style.display = 'none';
-            cancelAnimationFrame(gameLoopId); 
             document.getElementById('main-menu').style.display = 'flex';
+        }
+
+        document.getElementById('sys-pause-btn').addEventListener('click', openPause);
+        document.getElementById('btn-resume').addEventListener('click', resumeGame);
+        document.getElementById('btn-quit').addEventListener('click', () => {
+            document.getElementById('pause-menu').style.display = 'none';
+            exitToMainMenu();
+        });
+        document.getElementById('btn-rematch').addEventListener('click', () => {
+            document.getElementById('end-screen').style.display = 'none';
+            initLevel(); lastFrameTime = 0;
+        });
+        document.getElementById('btn-end-menu').addEventListener('click', () => {
+            document.getElementById('end-screen').style.display = 'none';
+            exitToMainMenu();
         });
 
         buildThemeGridMenu();
@@ -3223,7 +3306,7 @@
             try {
                 // Check if the script tags are actually loaded
                 if (typeof firebase === 'undefined') {
-                    console.error('Firebase SDK is missing! Check your HTML script tags.');
+                    console.error('Firebase SDK failed to load (blocked network, ad blocker or offline).');
                     return false;
                 }
                 
@@ -3285,7 +3368,7 @@
             document.getElementById('create-room-code').textContent = generateRoomCode();
             document.getElementById('custom-code-input').value = '';
             // Restore saved name
-            const saved = localStorage.getItem('nb_p1Name');
+            const saved = storage.getItem('nb_p1Name');
             if (saved) document.getElementById('room-host-name').value = saved;
             // Sync settings UI
             roomShotClockIdx = 1; roomAimAssist = true; roomClothIdx = 0; roomSelectedTheme = 0;
@@ -3303,7 +3386,7 @@
             document.getElementById('join-room-screen').style.display = 'flex';
             document.getElementById('join-code-input').value = '';
             document.getElementById('join-error-msg').textContent = '';
-            const saved = localStorage.getItem('nb_p2Name');
+            const saved = storage.getItem('nb_p2Name');
             if (saved) document.getElementById('join-guest-name').value = saved;
         }
 
@@ -3372,19 +3455,13 @@
         // ── Launch Room (host creates it in Firebase) ───────────────────
         document.getElementById('btn-launch-room').addEventListener('click', async () => {
 
-            if (currentRoomCode && db) {
-                try {
-                    // Completely wipe the game board node before setting status to 'ready'
-                    await db.ref('rooms/' + currentRoomCode + '/gameState').remove();
-                    await db.ref('rooms/' + currentRoomCode).update({ status: 'ready' });
-                } catch(e) { console.error(e); }
-            }
+            
 
             initAudio(); 
             if (typeof sfx !== 'undefined') sfx.click();
 
             if (!initFirebase()) {
-                alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
+                alert('Could not reach Firebase.\nCheck your internet connection and disable any ad blocker or VPN for this page, then reload.');
                 return;
             }
 
@@ -3395,7 +3472,7 @@
                     : document.getElementById('create-room-code').textContent.replace(/·/g, '').padEnd(6, generateRoomCode()).substring(0, 6);
 
             const hostName = document.getElementById('room-host-name').value.trim() || 'PLAYER 01';
-            localStorage.setItem('nb_p1Name', hostName);
+            storage.setItem('nb_p1Name', hostName);
 
             const roomData = {
                 host: hostName,
@@ -3414,7 +3491,7 @@
             try {
                 // Prevent overwriting an active room
                 const existing = await db.ref('rooms/' + code).once('value');
-                if (existing.val() && existing.val().status === 'waiting') {
+                if (existing.val()) {   // any existing room, not only waiting ones (prevents hijacking live games)
                     alert('That room code is already in use. Please generate a new one.');
                     return;
                 }
@@ -3428,9 +3505,7 @@
 
                 // Auto-delete room after 10 min if nobody joins
                 setTimeout(() => {
-                    if (currentRoomCode === code && db) {
-                        db.ref('rooms/' + code).remove().catch(() => {});
-                    }
+                    if (currentRoomCode === code && db) { db.ref('rooms/' + code + '/status').once('value').then(st => { if (st.val() === 'waiting') db.ref('rooms/' + code).remove(); }).catch(() => {}); }  // only expire rooms nobody joined
                 }, 10 * 60 * 1000);
 
             } catch(err) {
@@ -3440,15 +3515,17 @@
         }); // ─── END OF ASSYNC WRAPPER ───
 
         function listenForOpponent(code) {
+            let opponentJoined = false;
             if (activeRoomRef && activeRoomListener) activeRoomRef.off('value', activeRoomListener);
             activeRoomRef = db.ref('rooms/' + code);
             activeRoomListener = activeRoomRef.on('value', (snap) => {
                 const room = snap.val();
                 if (!room) { showOnlineMenu(); return; }
-                if (room.guest && room.status === 'ready') {
+                if (room.guest && room.status === 'ready' && !opponentJoined) {
+                    opponentJoined = true;
                     document.getElementById('waiting-status-msg').textContent =
                         (room.guest.toUpperCase()) + ' HAS JOINED — STARTING GAME...';
-                    setTimeout(() => startOnlineGame(room), 1400);
+                    setTimeout(() => { if (currentRoomCode === code) startOnlineGame(room); }, 1400);
                 }
             });
         }
@@ -3457,7 +3534,7 @@
         document.getElementById('btn-join-confirm').addEventListener('click', async () => {
             initAudio(); sfx.click();
             if (!initFirebase()) {
-                alert('Firebase is not configured yet.\nReplace the firebaseConfig values in the script with your project\'s credentials.');
+                alert('Could not reach Firebase.\nCheck your internet connection and disable any ad blocker or VPN for this page, then reload.');
                 return;
             }
 
@@ -3467,7 +3544,7 @@
             if (!code) { errEl.textContent = '⚠  ENTER A ROOM CODE'; return; }
 
             const guestName = document.getElementById('join-guest-name').value.trim() || 'PLAYER 02';
-            localStorage.setItem('nb_p2Name', guestName);
+            storage.setItem('nb_p2Name', guestName);
 
             errEl.textContent = 'SEARCHING...';
             errEl.style.color = '#38bdf8';
@@ -3479,7 +3556,11 @@
                 if (!room)                      { errEl.style.color='#f43f5e'; errEl.textContent = '⚠  ROOM NOT FOUND'; return; }
                 if (room.status !== 'waiting')  { errEl.style.color='#f43f5e'; errEl.textContent = '⚠  ROOM IS FULL OR CLOSED'; return; }
 
-                await db.ref('rooms/' + code).update({ guest: guestName, status: 'ready' });
+                const tx = await db.ref('rooms/' + code).transaction(r => {   // atomic: two guests can no longer both join
+                    if (!r || r.status !== 'waiting') return;
+                    r.guest = guestName; r.status = 'ready'; return r;
+                });
+                if (!tx.committed) { errEl.style.color = '#f43f5e'; errEl.textContent = '⚠  ROOM IS FULL OR CLOSED'; return; }
 
                 currentRoomCode = code;
                 isRoomHost      = false;
@@ -3494,18 +3575,7 @@
             }
         });
 
-        db.ref('rooms/' + currentRoomCode + '/players').on('child_removed', () => {
-            if (!matchEndCondition) {
-                matchEndCondition = true;
-                shotActive = false;
-                clearInterval(shotClockInterval);
-                
-                // Show victory on the ticker
-                updateTickerMessage("OPPONENT DISCONNECTED! YOU WIN.");
-                
-                // You can also trigger your end-game UI screen here
-            }
-        });
+        
 
         // Auto-uppercase + sanitise join input
         document.getElementById('join-code-input').addEventListener('input', function() {
@@ -3522,6 +3592,8 @@
 
             // Apply room settings to the game engine
             const s = room.settings || {};
+            roomTimerSetting = (typeof s.shotClock === 'number') ? s.shotClock : 15;   // was never applied before
+            if (localThemeBackup === null) localThemeBackup = selectedThemeIdx;
             if (s.aimAssist !== undefined)  aimAssistEnabled = s.aimAssist;
             if (s.clothIdx  !== undefined)  currentClothIdx  = s.clothIdx;
             if (s.themeIdx  !== undefined && THEME_PRESETS[s.themeIdx]) {
@@ -3540,7 +3612,7 @@
 
             document.getElementById('game-container').style.display = 'flex';
             document.getElementById('sys-pause-btn').style.display  = 'block';
-            gameMatchStartTime = Date.now()
+            
             initLevel();
             
             // ─── NEW: START MULTIPLAYER SYNC ───
@@ -3551,12 +3623,53 @@
                 isMyTurn = false; // Guest waits
                 updateTickerMessage("WAITING FOR OPPONENT...");
             }
-            listenForGameUpdates(room.id || currentRoomCode); // Start listening to Firebase!
-            if (typeof roomTimerSetting !== 'undefined' && roomTimerSetting > 0) {
-                startShotClock();
+            lastProcessedShotTime = 0;
+            listenForGameUpdates(currentRoomCode);
+            watchOpponentPresence(currentRoomCode);
+            startLoop();
+        }
+
+        // ── Listener bookkeeping, presence, cleanup ─────────────────────
+        const trackedListeners = [];
+        function trackOn(ref, cb) { ref.on('value', cb); trackedListeners.push({ ref, cb }); }
+
+        // If the opponent's presence node disappears mid-match (tab closed / connection lost) you win.
+        function watchOpponentPresence(code) {
+            if (!db) return;
+            const myKey = isRoomHost ? 'host' : 'guest', oppKey = isRoomHost ? 'guest' : 'host';
+            const mine = db.ref('rooms/' + code + '/presence/' + myKey);
+            mine.set(true).catch(() => {});
+            mine.onDisconnect().remove();
+            if (isRoomHost) db.ref('rooms/' + code).onDisconnect().remove();
+            let seenOpponent = false;
+            trackOn(db.ref('rooms/' + code + '/presence/' + oppKey), snap => {
+                if (snap.val()) { seenOpponent = true; return; }
+                if (seenOpponent && !matchEndCondition) {
+                    sfx.win();
+                    showEndScreen('VICTORY!', 'OPPONENT DISCONNECTED', isRoomHost ? colorP1 : colorP2);
+                }
+            });
+        }
+
+        // Detaches everything, removes presence/room, and restores local settings that online rooms overrode.
+        function leaveRoom() {
+            trackedListeners.splice(0).forEach(l => { try { l.ref.off('value', l.cb); } catch (_) {} });
+            if (activeRoomRef && activeRoomListener) { try { activeRoomRef.off('value', activeRoomListener); } catch (_) {} }
+            activeRoomListener = null;
+            if (!currentRoomCode) return;
+            if (db) {
+                db.ref('rooms/' + currentRoomCode + '/presence/' + (isRoomHost ? 'host' : 'guest')).remove().catch(() => {});
+                if (isRoomHost) db.ref('rooms/' + currentRoomCode).remove().catch(() => {});
             }
-            
-            gameLoopId = requestAnimationFrame(gameLoop);
+            currentRoomCode = null; isRoomHost = false; isMyTurn = false;
+            roomTimerSetting = 15.0; lastProcessedShotTime = 0;
+            aimAssistEnabled = (storage.getItem('nb_aimAssist') ?? 'true') === 'true';
+            currentClothIdx = parseInt(storage.getItem('nb_clothIdx') ?? '0') || 0;
+            if (localThemeBackup !== null) {
+                selectedThemeIdx = localThemeBackup; colorP1 = THEME_PRESETS[selectedThemeIdx].p1; colorP2 = THEME_PRESETS[selectedThemeIdx].p2;
+                localThemeBackup = null; buildThemeGridMenu();
+            }
+            preRenderCloth();
         }
 
         // ── Cancel Room (host cancels from waiting screen) ──────────────
@@ -3616,6 +3729,50 @@
          'room-toggle-clock','room-toggle-aim','room-toggle-cloth'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('mouseenter', () => { if(sfxVolume > 0) sfx.hover(); });
+        });
+    
+        // ══════════════════════════════════════════════════════════════════
+        //   KEYBOARD, EFFECTS TOGGLE, AUTO-PAUSE
+        // ══════════════════════════════════════════════════════════════════
+        window.addEventListener('keydown', e => {
+            if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+            const k = e.key;
+            if (k === 'Escape' || k === 'p' || k === 'P') { togglePause(); e.preventDefault(); return; }
+            if (k === 'm' || k === 'M') { toggleMute(); return; }
+            if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = true; e.preventDefault(); }
+            else if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = true; e.preventDefault(); }
+            else if (k === 'Shift') { keys.fine = true; }
+            else if (e.code === 'Space') {
+                e.preventDefault();
+                if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+                if (!e.repeat && canControl() && !keyCharging) { keyCharging = true; setPower(0); }
+            }
+        });
+        window.addEventListener('keyup', e => {
+            const k = e.key;
+            if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = false;
+            else if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = false;
+            else if (k === 'Shift') keys.fine = false;
+            else if (e.code === 'Space' && keyCharging) {
+                keyCharging = false;
+                if (canControl() && currentPower > 5) fireShot(); else resetPowerUI();
+            }
+        });
+        window.addEventListener('blur', () => { keys.left = keys.right = keys.fine = false; if (keyCharging) { keyCharging = false; resetPowerUI(); } });
+
+        const fxBtn = document.getElementById('toggle-fx');
+        function syncFxBtn() { fxBtn.innerText = fxEnabled ? 'ENABLED' : 'DISABLED'; fxBtn.classList.toggle('off', !fxEnabled); }
+        syncFxBtn();
+        fxBtn.addEventListener('click', () => {
+            initAudio(); sfx.click();
+            fxEnabled = !fxEnabled; storage.setItem('nb_fx', fxEnabled);
+            if (!fxEnabled) { shakeMag = 0; canvas.style.transform = ''; }
+            syncFxBtn();
+        });
+
+        // Don't let a local match run (or the shot clock burn) while the tab is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isGameRunning && !currentRoomCode && !matchEndCondition) openPause();
         });
     </script>
 </body>
